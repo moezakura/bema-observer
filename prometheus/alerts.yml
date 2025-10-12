@@ -1,0 +1,43 @@
+groups:
+  - name: basic_alerts
+    interval: 30s
+    rules:
+      # Prometheusのターゲットダウン検知
+      - alert: InstanceDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "インスタンス {{ $labels.instance }} がダウンしています"
+          description: "{{ $labels.job }} のインスタンス {{ $labels.instance }} が5分以上応答していません。"
+
+      # 高CPU使用率アラート（Node Exporterが有効な場合）
+      # - alert: HighCPUUsage
+      #   expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+      #   for: 10m
+      #   labels:
+      #     severity: warning
+      #   annotations:
+      #     summary: "インスタンス {{ $labels.instance }} のCPU使用率が高い"
+      #     description: "CPU使用率が {{ $value }}% です。"
+
+      # 高メモリ使用率アラート（Node Exporterが有効な場合）
+      # - alert: HighMemoryUsage
+      #   expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 90
+      #   for: 10m
+      #   labels:
+      #     severity: warning
+      #   annotations:
+      #     summary: "インスタンス {{ $labels.instance }} のメモリ使用率が高い"
+      #     description: "メモリ使用率が {{ $value }}% です。"
+
+      # ディスク使用率アラート（Node Exporterが有効な場合）
+      # - alert: HighDiskUsage
+      #   expr: (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes * 100 > 85
+      #   for: 10m
+      #   labels:
+      #     severity: warning
+      #   annotations:
+      #     summary: "インスタンス {{ $labels.instance }} のディスク使用率が高い"
+      #     description: "マウントポイント {{ $labels.mountpoint }} の使用率が {{ $value }}% です。"

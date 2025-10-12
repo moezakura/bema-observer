@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:v3.6.0
+    container_name: prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.listen-address=0.0.0.0:9090'
+    ports:
+      - "0.0.0.0:9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - ./prometheus/rules:/etc/prometheus/rules:ro
+      - ./prometheus/targets:/etc/prometheus/targets:rw
+      - prometheus_data:/prometheus
+    networks:
+      - monitoring
+
+  node-exporter-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: node-exporter-api
+    restart: unless-stopped
+    environment:
+      - TARGETS_FILE=/etc/prometheus/targets/node-exporters.json
+      - PROMETHEUS_URL=http://prometheus:9090
+    ports:
+      - "0.0.0.0:5000:5000"
+    volumes:
+      - ./prometheus/targets:/etc/prometheus/targets:rw
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+
+  grafana:
+    image: grafana/grafana:12.2.0
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=
+      - GF_SERVER_HTTP_ADDR=0.0.0.0
+    ports:
+      - "0.0.0.0:3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  grafana_data:

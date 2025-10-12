@@ -1,0 +1,37 @@
+# ボリュームデータ
+volumes/
+*_data/
+
+# Grafana設定
+grafana/grafana.db
+
+# Prometheus データ
+prometheus/data/
+prometheus/targets/node-exporters.json
+
+# エディタ・IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ログファイル
+*.log
+
+# 環境変数ファイル
+.env
+.env.local
+.env.*.local
+
+# 一時ファイル
+tmp/
+temp/
+*.tmp
+
+# Node/Bun
+api/node_modules/
