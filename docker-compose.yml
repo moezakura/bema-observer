@@ -31,7 +31,8 @@ services:
     container_name: node-exporter-api
     restart: unless-stopped
     environment:
-      - TARGETS_FILE=/etc/prometheus/targets/node-exporters.json
+      - NODE_TARGETS_FILE=/etc/prometheus/targets/node-exporters.json
+      - SMART_TARGETS_FILE=/etc/prometheus/targets/smart-exporters.json
       - PROMETHEUS_URL=http://prometheus:9090
     ports:
       - "0.0.0.0:5000:5000"

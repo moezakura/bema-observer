@@ -33,7 +33,7 @@ podman-compose up -d
 - **Grafana**: http://localhost:3000
   - デフォルトユーザー: `admin`
   - デフォルトパスワード: `admin`
-- **Node Exporter API**: http://localhost:5000
+- **Exporter管理API**: http://localhost:5000
 
 初回ログイン後、パスワードの変更を求められます。
 
@@ -47,7 +47,7 @@ Grafanaには自動的にPrometheusがデータソースとして登録されま
 bema-observer/
 ├── docker-compose.yml          # Podman Compose設定
 ├── api/
-│   ├── index.ts               # Node Exporter管理API (Hono + Bun)
+│   ├── index.ts               # Exporter管理API (Hono + Bun)
 │   ├── package.json           # npm依存関係
 │   ├── tsconfig.json          # TypeScript設定
 │   └── Dockerfile             # APIサーバー用Dockerfile
@@ -56,7 +56,8 @@ bema-observer/
 │   ├── alerts.yml             # アラートルール
 │   ├── rules/                 # 追加ルール用ディレクトリ
 │   └── targets/               # 動的ターゲット定義（file_sd_configs）
-│       └── node-exporters.json
+│       ├── node-exporters.json
+│       └── smart-exporters.json
 ├── grafana/
 │   ├── provisioning/
 │   │   ├── datasources/       # データソース設定
@@ -67,13 +68,15 @@ bema-observer/
 
 ## カスタマイズ
 
-### Node Exporterの動的追加（API経由）
+### Exporterの動的管理（API経由）
 
-Node Exporter管理APIを使用して、HTTPリクエストで動的に監視対象を追加できます。
+Exporter管理APIを使用して、HTTPリクエストで動的に監視対象（Node ExporterやSMART Exporter）を追加・削除できます。
 
 #### APIエンドポイント
 
 APIサーバーは`http://localhost:5000`で起動します。
+
+#### Node Exporter
 
 **Node Exporterを追加**
 
@@ -119,14 +122,53 @@ curl -X DELETE http://localhost:5000/node-exporter \
 curl http://localhost:5000/health
 ```
 
+#### SMART Exporter
+
+**SMART Exporterを追加**
+
+```bash
+curl -X POST http://localhost:5000/smart-exporter \
+  -H "Content-Type: application/json" \
+  -d '{
+    "ip": "192.168.1.200",
+    "port": 9633,
+    "labels": {
+      "environment": "production",
+      "server": "storage-01"
+    }
+  }'
+```
+
+パラメータ：
+- `ip` (必須): SMART ExporterのIPアドレス
+- `port` (オプション, デフォルト: 9633): SMART Exporterのポート番号
+- `labels` (オプション): 追加のPrometheusラベル
+
+**登録されているSMART Exporterの一覧を取得**
+
+```bash
+curl http://localhost:5000/smart-exporters
+```
+
+**SMART Exporterを削除**
+
+```bash
+curl -X DELETE http://localhost:5000/smart-exporter \
+  -H "Content-Type: application/json" \
+  -d '{
+    "ip": "192.168.1.200",
+    "port": 9633
+  }'
+```
+
 #### 仕組み
 
-- APIサーバーは受け取ったIPアドレスとポートを`prometheus/targets/node-exporters.json`に保存
-- host_typeはPrometheusの`host_type`ラベルとして保存され、PromQLでのフィルタリングやGrafanaでの可視化に利用可能
-- Prometheusは30秒ごとにこのファイルをチェックし、自動的に監視対象を更新
+- APIサーバーは受け取ったIPアドレスとポートを`prometheus/targets/node-exporters.json`または`prometheus/targets/smart-exporters.json`に保存
+- host_type（Node Exporterのみ）はPrometheusの`host_type`ラベルとして保存され、PromQLでのフィルタリングやGrafanaでの可視化に利用可能
+- Prometheusは30秒ごとにこれらのファイルをチェックし、自動的に監視対象を更新
 - APIサーバーがPrometheusに設定のリロードも指示するため、即座に反映されます
 
-#### host_typeの活用例
+#### host_typeの活用例（Node Exporter）
 
 host_typeを使用することで、Prometheusでのクエリが簡単になります：
 
@@ -142,6 +184,24 @@ node_disk_io_time_seconds_total{host_type="virtual"}
 
 # ホストタイプごとのノード数
 count by (host_type) (up)
+```
+
+#### SMART Exporterの活用例
+
+SMART Exporterを使用することで、ディスクの健康状態を監視できます：
+
+```promql
+# SMART属性値の取得
+smartctl_device_smart_status{device="/dev/sda"}
+
+# ディスクの温度
+smartctl_device_temperature
+
+# ディスクエラー数
+smartctl_device_error_log_count
+
+# 電源投入時間
+smartctl_device_power_on_seconds
 ```
 
 ### 監視対象の手動追加

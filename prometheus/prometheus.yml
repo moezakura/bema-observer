@@ -32,6 +32,34 @@ scrape_configs:
       - files:
           - '/etc/prometheus/targets/node-exporters.json'
         refresh_interval: 30s
+    relabel_configs:
+      # __address__をnode_addressラベルとして保存
+      - source_labels: [__address__]
+        target_label: 'node_address'
+
+      # IPアドレス部分のみを抽出
+      - source_labels: [__address__]
+        regex: '([^:]+):.*'
+        target_label: 'node_ip'
+        replacement: '$1'
+
+  # SMART Exporter（ディスクSMART情報収集）
+  # APIで動的に管理されるsmart-exporterのターゲット
+  - job_name: 'smart'
+    file_sd_configs:
+      - files:
+          - '/etc/prometheus/targets/smart-exporters.json'
+        refresh_interval: 30s
+    relabel_configs:
+      # __address__をnode_addressラベルとして保存
+      - source_labels: [__address__]
+        target_label: 'node_address'
+
+      # IPアドレス部分のみを抽出
+      - source_labels: [__address__]
+        regex: '([^:]+):.*'
+        target_label: 'node_ip'
+        replacement: '$1'
 
   # cAdvisor（コンテナメトリクス収集）
   # - job_name: 'cadvisor'
@@ -46,14 +74,3 @@ scrape_configs:
   #     - targets: ['myapp:8080']
   #       labels:
   #         instance: 'myapp'
-
-    relabel_configs:
-      # __address__をnode_addressラベルとして保存
-      - source_labels: [__address__]
-        target_label: 'node_address'
-      
-      # または、IPアドレス部分のみを抽出
-      - source_labels: [__address__]
-        regex: '([^:]+):.*'
-        target_label: 'node_ip'
-        replacement: '$1'

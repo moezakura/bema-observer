@@ -1,6 +1,6 @@
 /**
- * Node Exporter管理API
- * Prometheusの監視対象にnode-exporterを動的に追加するAPIサーバー
+ * Exporter管理API
+ * Prometheusの監視対象にnode-exporterやsmart-exporterを動的に追加するAPIサーバー
  */
 
 import { Hono } from 'hono';
@@ -17,7 +17,8 @@ app.use('*', logger());
 app.use('*', cors());
 
 // 設定
-const TARGETS_FILE = process.env.TARGETS_FILE || '/etc/prometheus/targets/node-exporters.json';
+const NODE_TARGETS_FILE = process.env.NODE_TARGETS_FILE || process.env.TARGETS_FILE || '/etc/prometheus/targets/node-exporters.json';
+const SMART_TARGETS_FILE = process.env.SMART_TARGETS_FILE || '/etc/prometheus/targets/smart-exporters.json';
 const PROMETHEUS_URL = process.env.PROMETHEUS_URL || 'http://prometheus:9090';
 
 // 型定義
@@ -38,14 +39,25 @@ interface NodeExporterDeleteRequest {
   port?: number;
 }
 
+interface SmartExporterRequest {
+  ip: string;
+  port?: number;
+  labels?: Record<string, string>;
+}
+
+interface SmartExporterDeleteRequest {
+  ip: string;
+  port?: number;
+}
+
 // ユーティリティ関数
-async function loadTargets(): Promise<TargetGroup[]> {
+async function loadTargets(targetsFile: string): Promise<TargetGroup[]> {
   try {
-    if (!existsSync(TARGETS_FILE)) {
+    if (!existsSync(targetsFile)) {
       return [];
     }
 
-    const data = await readFile(TARGETS_FILE, 'utf-8');
+    const data = await readFile(targetsFile, 'utf-8');
     return JSON.parse(data);
   } catch (error) {
     console.error('Failed to load targets file:', error);
@@ -53,14 +65,14 @@ async function loadTargets(): Promise<TargetGroup[]> {
   }
 }
 
-async function saveTargets(targets: TargetGroup[]): Promise<boolean> {
+async function saveTargets(targetsFile: string, targets: TargetGroup[]): Promise<boolean> {
   try {
-    const dir = dirname(TARGETS_FILE);
+    const dir = dirname(targetsFile);
     if (!existsSync(dir)) {
       await mkdir(dir, { recursive: true });
     }
 
-    await writeFile(TARGETS_FILE, JSON.stringify(targets, null, 2), 'utf-8');
+    await writeFile(targetsFile, JSON.stringify(targets, null, 2), 'utf-8');
     return true;
   } catch (error) {
     console.error('Failed to save targets file:', error);
@@ -114,7 +126,7 @@ app.get('/health', (c) => {
 });
 
 app.get('/node-exporters', async (c) => {
-  const targets = await loadTargets();
+  const targets = await loadTargets(NODE_TARGETS_FILE);
 
   const exporters = [];
   for (const targetGroup of targets) {
@@ -177,7 +189,7 @@ app.post('/node-exporter', async (c) => {
   const target = `${ip}:${port}`;
 
   // 既存のターゲットを読み込み
-  const targets = await loadTargets();
+  const targets = await loadTargets(NODE_TARGETS_FILE);
 
   // 既に存在するかチェック
   for (const targetGroup of targets) {
@@ -199,7 +211,7 @@ app.post('/node-exporter', async (c) => {
   });
 
   // 保存
-  if (!(await saveTargets(targets))) {
+  if (!(await saveTargets(NODE_TARGETS_FILE, targets))) {
     return c.json({ error: 'Failed to save targets' }, 500);
   }
 
@@ -230,7 +242,7 @@ app.delete('/node-exporter', async (c) => {
   const target = `${ip}:${port}`;
 
   // 既存のターゲットを読み込み
-  const targets = await loadTargets();
+  const targets = await loadTargets(NODE_TARGETS_FILE);
 
   // ターゲットを検索して削除
   let found = false;
@@ -264,7 +276,7 @@ app.delete('/node-exporter', async (c) => {
   }
 
   // 保存
-  if (!(await saveTargets(newTargets))) {
+  if (!(await saveTargets(NODE_TARGETS_FILE, newTargets))) {
     return c.json({ error: 'Failed to save targets' }, 500);
   }
 
@@ -277,9 +289,163 @@ app.delete('/node-exporter', async (c) => {
   });
 });
 
+// SMARTExporter エンドポイント
+app.get('/smart-exporters', async (c) => {
+  const targets = await loadTargets(SMART_TARGETS_FILE);
+
+  const exporters = [];
+  for (const targetGroup of targets) {
+    const labels = targetGroup.labels || {};
+
+    for (const target of targetGroup.targets) {
+      exporters.push({
+        target,
+        labels,
+      });
+    }
+  }
+
+  return c.json({
+    count: exporters.length,
+    exporters,
+  });
+});
+
+app.post('/smart-exporter', async (c) => {
+  const body = await c.req.json<SmartExporterRequest>();
+
+  // 必須パラメータのチェック
+  const { ip } = body;
+  const port = body.port || 9633; // SMARTExporterのデフォルトポート
+
+  if (!ip) {
+    return c.json({ error: 'IP address is required' }, 400);
+  }
+
+  // バリデーション
+  if (!validateIP(ip)) {
+    return c.json({ error: 'Invalid IP address' }, 400);
+  }
+
+  if (!validatePort(port)) {
+    return c.json({ error: 'Invalid port number (1-65535)' }, 400);
+  }
+
+  // ラベルの取得（オプション）
+  const labels: Record<string, string> = body.labels || {};
+  if (!labels.instance) {
+    labels.instance = ip;
+  }
+
+  // ターゲット文字列を作成
+  const target = `${ip}:${port}`;
+
+  // 既存のターゲットを読み込み
+  const targets = await loadTargets(SMART_TARGETS_FILE);
+
+  // 既に存在するかチェック
+  for (const targetGroup of targets) {
+    if (targetGroup.targets.includes(target)) {
+      return c.json(
+        {
+          error: 'Target already exists',
+          target,
+        },
+        409
+      );
+    }
+  }
+
+  // 新しいターゲットグループを追加
+  targets.push({
+    targets: [target],
+    labels,
+  });
+
+  // 保存
+  if (!(await saveTargets(SMART_TARGETS_FILE, targets))) {
+    return c.json({ error: 'Failed to save targets' }, 500);
+  }
+
+  // Prometheusに設定リロードを指示
+  await reloadPrometheus();
+
+  return c.json(
+    {
+      message: 'SMART exporter added successfully',
+      target,
+      labels,
+    },
+    201
+  );
+});
+
+app.delete('/smart-exporter', async (c) => {
+  const body = await c.req.json<SmartExporterDeleteRequest>();
+
+  const { ip } = body;
+  const port = body.port || 9633;
+
+  if (!ip) {
+    return c.json({ error: 'IP address is required' }, 400);
+  }
+
+  const target = `${ip}:${port}`;
+
+  // 既存のターゲットを読み込み
+  const targets = await loadTargets(SMART_TARGETS_FILE);
+
+  // ターゲットを検索して削除
+  let found = false;
+  const newTargets: TargetGroup[] = [];
+
+  for (const targetGroup of targets) {
+    if (targetGroup.targets.includes(target)) {
+      found = true;
+      // ターゲットを削除
+      const filteredTargets = targetGroup.targets.filter(t => t !== target);
+      // ターゲットが空になったグループは除外
+      if (filteredTargets.length > 0) {
+        newTargets.push({
+          ...targetGroup,
+          targets: filteredTargets,
+        });
+      }
+    } else {
+      newTargets.push(targetGroup);
+    }
+  }
+
+  if (!found) {
+    return c.json(
+      {
+        error: 'Target not found',
+        target,
+      },
+      404
+    );
+  }
+
+  // 保存
+  if (!(await saveTargets(SMART_TARGETS_FILE, newTargets))) {
+    return c.json({ error: 'Failed to save targets' }, 500);
+  }
+
+  // Prometheusに設定リロードを指示
+  await reloadPrometheus();
+
+  return c.json({
+    message: 'SMART exporter deleted successfully',
+    target,
+  });
+});
+
 // 初期化: ターゲットファイルが存在しない場合は空配列で作成
-if (!existsSync(TARGETS_FILE)) {
-  await saveTargets([]);
+if (!existsSync(NODE_TARGETS_FILE)) {
+  await saveTargets(NODE_TARGETS_FILE, []);
+}
+if (!existsSync(SMART_TARGETS_FILE)) {
+  await saveTargets(SMART_TARGETS_FILE, []);
 }
 
 export default {

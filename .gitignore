@@ -8,6 +8,7 @@ grafana/grafana.db
 # Prometheus データ
 prometheus/data/
 prometheus/targets/node-exporters.json
+prometheus/targets/smart-exporters.json
 
 # エディタ・IDE
 .vscode/
