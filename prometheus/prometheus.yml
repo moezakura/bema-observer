@@ -4,12 +4,12 @@ global:
   external_labels:
     monitor: 'bema-observer'
 
-# アラートマネージャーの設定（オプション）
-# alerting:
-#   alertmanagers:
-#     - static_configs:
-#         - targets:
-#           - alertmanager:9093
+# アラートマネージャーの設定
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
 
 # ルールファイルの読み込み
 rule_files:

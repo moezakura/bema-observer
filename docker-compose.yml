@@ -63,6 +63,37 @@ services:
     depends_on:
       - prometheus
 
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    container_name: alertmanager
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.listen-address=0.0.0.0:9093'
+    ports:
+      - "0.0.0.0:9093:9093"
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    networks:
+      - monitoring
+
+  alertmanager-ntfy:
+    image: ghcr.io/alexbakker/alertmanager-ntfy:latest
+    container_name: alertmanager-ntfy
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./alertmanager-ntfy/config.yml:/etc/alertmanager-ntfy/config.yml:ro
+    command:
+      - '--config=/etc/alertmanager-ntfy/config.yml'
+    networks:
+      - monitoring
+    depends_on:
+      - alertmanager
+
 networks:
   monitoring:
     driver: bridge
@@ -70,3 +101,4 @@ networks:
 volumes:
   prometheus_data:
   grafana_data:
+  alertmanager_data:
