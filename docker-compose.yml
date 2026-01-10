@@ -8,7 +8,7 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention.time=30d'
+      - '--storage.tsdb.retention.time=5y'
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
@@ -79,20 +79,32 @@ services:
     networks:
       - monitoring
 
-  alertmanager-ntfy:
-    image: ghcr.io/alexbakker/alertmanager-ntfy:latest
-    container_name: alertmanager-ntfy
-    restart: unless-stopped
+  alertmanager-ntfy-init:
+    image: alpine:3.20
+    container_name: alertmanager-ntfy-init
     env_file:
       - .env
     volumes:
-      - ./alertmanager-ntfy/config.yml:/etc/alertmanager-ntfy/config.yml:ro
-    command:
-      - '--config=/etc/alertmanager-ntfy/config.yml'
+      - ./alertmanager-ntfy/config.yml.template:/template/config.yml.template:ro
+      - alertmanager_ntfy_config:/config
+    command: ["/bin/sh", "-c", "apk add --no-cache gettext && envsubst < /template/config.yml.template > /config/config.yml"]
+    networks:
+      - monitoring
+
+  alertmanager-ntfy:
+    image: ghcr.io/alexbakker/alertmanager-ntfy:1.0.2
+    container_name: alertmanager-ntfy
+    restart: unless-stopped
+    volumes:
+      - alertmanager_ntfy_config:/config:ro
+    command: ["--configs=/config/config.yml"]
     networks:
       - monitoring
     depends_on:
-      - alertmanager
+      alertmanager-ntfy-init:
+        condition: service_completed_successfully
+      alertmanager:
+        condition: service_started
 
 networks:
   monitoring:
@@ -102,3 +114,4 @@ volumes:
   prometheus_data:
   grafana_data:
   alertmanager_data:
+  alertmanager_ntfy_config:

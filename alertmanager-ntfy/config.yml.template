@@ -1,0 +1,20 @@
+http:
+  addr: :8080
+
+ntfy:
+  baseurl: ${NTFY_URL}
+  auth:
+    basic:
+      username: ${NTFY_USERNAME}
+      password: ${NTFY_PASSWORD}
+  notification:
+    topic: ${NTFY_TOPIC}
+    priority: 'labels["severity"] == "urgent" ? "max" : labels["severity"] == "critical" ? "max" : labels["severity"] == "high" ? "high" : "default"'
+    templates:
+      title: "[{{ .Status }}] {{ index .Labels \"alertname\" }}"
+      description: "{{ if index .Annotations \"summary\" }}{{ index .Annotations \"summary\" }}{{ else }}{{ index .Annotations \"description\" }}{{ end }}"
+    tags:
+      - tag: "warning"
+        condition: status == "firing"
+      - tag: "white_check_mark"
+        condition: status == "resolved"
