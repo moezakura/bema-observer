@@ -1,0 +1,28 @@
+groups:
+  - name: node_recording
+    interval: 30s
+    rules:
+      - record: instance:node_cpu:utilization
+        expr: 1 - avg by(instance, host_type) (rate(node_cpu_seconds_total{job="node",mode="idle"}[5m]))
+
+      - record: instance:node_memory:utilization
+        expr: |
+          (node_memory_MemTotal_bytes{job="node"} - node_memory_MemAvailable_bytes{job="node"})
+          / node_memory_MemTotal_bytes{job="node"}
+
+      - record: instance_mountpoint:node_filesystem:utilization
+        expr: |
+          1 - node_filesystem_avail_bytes{job="node",fstype=~"ext4|xfs|btrfs|zfs|vfat"}
+          / node_filesystem_size_bytes{job="node",fstype=~"ext4|xfs|btrfs|zfs|vfat"}
+
+      - record: instance:node_network_receive_bytes:rate5m
+        expr: sum by(instance) (rate(node_network_receive_bytes_total{job="node",device!~"lo|veth.*|docker.*|br-.*|podman.*|cali.*|cni.*|tailscale.*|flannel.*|tap.*|tun.*"}[5m]))
+
+      - record: instance:node_network_transmit_bytes:rate5m
+        expr: sum by(instance) (rate(node_network_transmit_bytes_total{job="node",device!~"lo|veth.*|docker.*|br-.*|podman.*|cali.*|cni.*|tailscale.*|flannel.*|tap.*|tun.*"}[5m]))
+
+      - record: instance_device:node_disk_io:utilization
+        expr: rate(node_disk_io_time_seconds_total{job="node"}[5m])
+
+      - record: instance:node_load1:normalized
+        expr: node_load1{job="node"} / on(instance) count by(instance) (node_cpu_seconds_total{job="node",mode="idle"})
