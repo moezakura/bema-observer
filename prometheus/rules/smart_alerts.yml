@@ -1,0 +1,123 @@
+groups:
+  - name: smart_health_alerts
+    interval: 60s
+    rules:
+      # SMART総合ステータス異常 (最終防衛線)
+      - alert: SmartStatusFailed
+        expr: smartctl_device_smart_status != 1
+        for: 1m
+        labels:
+          severity: urgent
+        annotations:
+          summary: "SMART総合ステータス異常 ({{ $labels.server }} / {{ $labels.device }})"
+          description: "{{ $labels.server }} ({{ $labels.instance }}) の {{ $labels.device }} (serial {{ $labels.serial_number }}, {{ $labels.model_family }}) でSMART総合ステータスが異常。"
+
+      # Pending sector 増加 (Reallocated への遷移直前)
+      - alert: DiskPendingSectorIncreasing
+        expr: disk:pending_sectors:growth_24h > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Pending sector が増加 ({{ $labels.server }} / {{ $labels.device }})"
+          description: "シリアル {{ $labels.serial_number }} ({{ $labels.model_family }}) で Pending sector が直近24hで {{ $value }} 増加。Reallocated への遷移直前の状態。"
+
+      # Reallocated sector 増加 (劣化進行中)
+      - alert: DiskReallocatedIncreasing
+        expr: disk:reallocated_sectors:growth_7d > 0
+        for: 1h
+        labels:
+          severity: critical
+        annotations:
+          summary: "Reallocated sector が増加 ({{ $labels.server }} / {{ $labels.device }})"
+          description: "シリアル {{ $labels.serial_number }} で Reallocated が7日で {{ $value }} 増加。劣化進行中。"
+
+      # Offline uncorrectable (データ損失リスク)
+      - alert: DiskOfflineUncorrectable
+        expr: disk:offline_uncorrectable:raw > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Offline uncorrectable 検出 ({{ $labels.server }} / {{ $labels.device }})"
+          description: "シリアル {{ $labels.serial_number }} で訂正不能セクタを {{ $value }} 検出。データ損失のリスク。"
+
+      # Reported uncorrectable
+      - alert: DiskReportedUncorrectable
+        expr: disk:reported_uncorrectable:raw > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Reported uncorrectable 検出 ({{ $labels.server }} / {{ $labels.device }})"
+          description: "シリアル {{ $labels.serial_number }} で報告された訂正不能エラー数 {{ $value }}。"
+
+      # NVMe 予備ブロック枯渇
+      - alert: NVMeSpareExhausted
+        expr: smartctl_device_available_spare < smartctl_device_available_spare_threshold
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "NVMe 予備ブロック枯渇 ({{ $labels.server }} / {{ $labels.device }})"
+          description: "シリアル {{ $labels.serial_number }} ({{ $labels.model_family }}) の available_spare が threshold を下回りました。即時交換。"
+
+      # NVMe critical warning フラグ
+      - alert: NVMeCriticalWarning
+        expr: smartctl_device_critical_warning != 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "NVMe critical warning フラグ立ち ({{ $labels.server }} / {{ $labels.device }})"
+          description: "シリアル {{ $labels.serial_number }} で NVMe critical_warning = {{ $value }}。"
+
+      # NVMe メディアエラー
+      - alert: NVMeMediaErrors
+        expr: smartctl_device_media_errors > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "NVMe メディアエラー ({{ $labels.server }} / {{ $labels.device }})"
+          description: "シリアル {{ $labels.serial_number }} で media_errors = {{ $value }}。"
+
+      # NVMe 寿命消費
+      - alert: NVMeLifetimeHigh
+        expr: smartctl_device_percentage_used > 80
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "NVMe 寿命消費 80%超 ({{ $labels.server }} / {{ $labels.device }})"
+          description: "シリアル {{ $labels.serial_number }} の percentage_used = {{ $value }}%。交換計画を。"
+
+      # UDMA CRC エラー増加 (ケーブル疑い)
+      - alert: DiskCRCErrorsIncreasing
+        expr: disk:crc_errors:growth_24h > 0
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "UDMA CRC エラー増加 ({{ $labels.server }} / {{ $labels.device }})"
+          description: "シリアル {{ $labels.serial_number }} で CRC エラーが24hで {{ $value }} 増加。ケーブル/コネクタ起因の可能性。物理層の確認推奨。"
+
+      # ディスク高温
+      - alert: DiskHighTemperature
+        expr: avg_over_time(disk:temperature:celsius[1h]) > 50
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "ディスク高温 ({{ $labels.server }} / {{ $labels.device }}: {{ $value }}°C)"
+          description: "シリアル {{ $labels.serial_number }} の温度が1h平均で {{ $value }}°C。"
+
+      # SAS Grown defect list
+      - alert: ScsiGrownDefects
+        expr: smartctl_scsi_grown_defect_list > 0
+        for: 5m
+        labels:
+          severity: high
+        annotations:
+          summary: "SAS 不良セクタ検出 ({{ $labels.server }} / {{ $labels.device }})"
+          description: "シリアル {{ $labels.serial_number }} で grown defect list = {{ $value }}。"

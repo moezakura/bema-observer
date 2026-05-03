@@ -1,0 +1,33 @@
+groups:
+  - name: smart_health
+    interval: 5m
+    rules:
+      # SATA: 名前ではなく ID で固定 (ベンダー差異を吸収)
+      - record: disk:reallocated_sectors:raw
+        expr: smartctl_device_attribute{attribute_id="5",   attribute_value_type="raw"}
+      - record: disk:reported_uncorrectable:raw
+        expr: smartctl_device_attribute{attribute_id="187", attribute_value_type="raw"}
+      - record: disk:command_timeout:raw
+        expr: smartctl_device_attribute{attribute_id="188", attribute_value_type="raw"}
+      - record: disk:pending_sectors:raw
+        expr: smartctl_device_attribute{attribute_id="197", attribute_value_type="raw"}
+      - record: disk:offline_uncorrectable:raw
+        expr: smartctl_device_attribute{attribute_id="198", attribute_value_type="raw"}
+      - record: disk:crc_errors:raw
+        expr: smartctl_device_attribute{attribute_id="199", attribute_value_type="raw"}
+      - record: disk:temperature:celsius
+        expr: smartctl_device_temperature
+
+      # 24h / 7d 増分 (ダッシュボードとアラートで共通利用)
+      - record: disk:reallocated_sectors:growth_7d
+        expr: increase(disk:reallocated_sectors:raw[7d])
+      - record: disk:reallocated_sectors:growth_24h
+        expr: increase(disk:reallocated_sectors:raw[24h])
+      - record: disk:pending_sectors:growth_7d
+        expr: increase(disk:pending_sectors:raw[7d])
+      - record: disk:pending_sectors:growth_24h
+        expr: increase(disk:pending_sectors:raw[24h])
+      - record: disk:offline_uncorrectable:growth_7d
+        expr: increase(disk:offline_uncorrectable:raw[7d])
+      - record: disk:crc_errors:growth_24h
+        expr: increase(disk:crc_errors:raw[24h])
