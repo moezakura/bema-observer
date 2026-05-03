@@ -540,7 +540,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "topk(10, disk:pending_sectors:growth_7d + disk:reallocated_sectors:growth_7d + disk:offline_uncorrectable:raw + (disk:crc_errors:growth_24h / 100))",
+          "expr": "topk(10, sum by(instance, device, server) (disk:pending_sectors:growth_7d) + sum by(instance, device, server) (disk:reallocated_sectors:growth_7d) + sum by(instance, device, server) (disk:offline_uncorrectable:raw) + (sum by(instance, device, server) (disk:crc_errors:growth_24h) / 100))",
           "refId": "Score",
           "legendFormat": "",
           "format": "table",
@@ -552,7 +552,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "disk:pending_sectors:growth_7d",
+          "expr": "sum by(instance, device, server) (disk:pending_sectors:growth_7d)",
           "refId": "PendingD",
           "legendFormat": "",
           "format": "table",
@@ -564,7 +564,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "disk:reallocated_sectors:growth_7d",
+          "expr": "sum by(instance, device, server) (disk:reallocated_sectors:growth_7d)",
           "refId": "ReallocD",
           "legendFormat": "",
           "format": "table",
@@ -576,7 +576,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "disk:offline_uncorrectable:raw",
+          "expr": "sum by(instance, device, server) (disk:offline_uncorrectable:raw)",
           "refId": "OffUnc",
           "legendFormat": "",
           "format": "table",
@@ -588,7 +588,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "disk:crc_errors:growth_24h",
+          "expr": "sum by(instance, device, server) (disk:crc_errors:growth_24h)",
           "refId": "CrcD",
           "legendFormat": "",
           "format": "table",
@@ -600,7 +600,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "disk:temperature:celsius",
+          "expr": "sum by(instance, device, server) (disk:temperature:celsius)",
           "refId": "Temp",
           "legendFormat": "",
           "format": "table",
@@ -612,7 +612,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "smartctl_device",
+          "expr": "max by(instance, device, server, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
           "refId": "Info",
           "legendFormat": "",
           "format": "table",
