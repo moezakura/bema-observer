@@ -33,7 +33,7 @@ jobs:
           cd "$OBSERVER_DIR"
           podman run --rm --entrypoint promtool \
             -v ./prometheus:/etc/prometheus:ro \
-            prom/prometheus:v3.6.0 check config /etc/prometheus/prometheus.yml
+            docker.io/prom/prometheus:v3.6.0 check config /etc/prometheus/prometheus.yml
 
       - name: Apply podman-compose
         run: |
