@@ -26,6 +26,7 @@ jobs:
           cd "$OBSERVER_DIR"
           git fetch --prune origin
           git reset --hard origin/main
+          git clean -fd
 
       - name: Validate Prometheus config
         run: |
