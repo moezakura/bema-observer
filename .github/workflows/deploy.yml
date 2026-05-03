@@ -1,0 +1,60 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Pull & restart on observer host
+    runs-on: [self-hosted, bema-observer]
+    timeout-minutes: 10
+
+    env:
+      OBSERVER_DIR: ${{ vars.OBSERVER_DIR || '/home/mox/observer' }}
+      PROMETHEUS_URL: ${{ vars.PROMETHEUS_URL || 'http://localhost:9090' }}
+
+    steps:
+      - name: Sync repository
+        run: |
+          set -euxo pipefail
+          cd "$OBSERVER_DIR"
+          git fetch --prune origin
+          git reset --hard origin/main
+
+      - name: Validate Prometheus config
+        run: |
+          set -euxo pipefail
+          cd "$OBSERVER_DIR"
+          podman run --rm --entrypoint promtool \
+            -v ./prometheus:/etc/prometheus:ro \
+            prom/prometheus:v3.6.0 check config /etc/prometheus/prometheus.yml
+
+      - name: Apply podman-compose
+        run: |
+          set -euxo pipefail
+          cd "$OBSERVER_DIR"
+          podman-compose up -d
+
+      - name: Reload Prometheus rules (hot)
+        run: |
+          set -euxo pipefail
+          curl -fsS -X POST "$PROMETHEUS_URL/-/reload" || \
+            echo "reload skipped (lifecycle endpoint unavailable; container restart will pick up changes)"
+
+      - name: Verify SMART rules loaded
+        run: |
+          set -euxo pipefail
+          for i in 1 2 3 4 5; do
+            names=$(curl -fsS "$PROMETHEUS_URL/api/v1/rules" | jq -r '.data.groups[].name' | sort -u)
+            echo "$names"
+            echo "$names" | grep -q '^smart_health$' && echo "$names" | grep -q '^smart_health_alerts$' && exit 0
+            sleep 5
+          done
+          echo "SMART rule groups did not appear in /api/v1/rules" >&2
+          exit 1
