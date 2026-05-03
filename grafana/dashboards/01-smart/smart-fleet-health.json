@@ -540,7 +540,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "topk(10, (disk:pending_sectors:growth_7d > 0 OR on() vector(0)) + (disk:reallocated_sectors:growth_7d > 0 OR on() vector(0)) + (disk:offline_uncorrectable:raw > 0 OR on() vector(0)))",
+          "expr": "topk(10, disk:pending_sectors:growth_7d + disk:reallocated_sectors:growth_7d + disk:offline_uncorrectable:raw + (disk:crc_errors:growth_24h / 100))",
           "refId": "Score",
           "legendFormat": "",
           "format": "table",

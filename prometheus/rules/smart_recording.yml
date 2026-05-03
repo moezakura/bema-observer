@@ -3,18 +3,20 @@ groups:
     interval: 5m
     rules:
       # SATA: 名前ではなく ID で固定 (ベンダー差異を吸収)
+      # sum by(...) で attribute_id 等の固有ラベルを落とし、
+      # ダッシュボードでの算術演算 (pending + realloc + ...) が成立するようにする
       - record: disk:reallocated_sectors:raw
-        expr: smartctl_device_attribute{attribute_id="5",   attribute_value_type="raw"}
+        expr: sum by(instance, device, server, node_address, node_ip, job) (smartctl_device_attribute{attribute_id="5",   attribute_value_type="raw"})
       - record: disk:reported_uncorrectable:raw
-        expr: smartctl_device_attribute{attribute_id="187", attribute_value_type="raw"}
+        expr: sum by(instance, device, server, node_address, node_ip, job) (smartctl_device_attribute{attribute_id="187", attribute_value_type="raw"})
       - record: disk:command_timeout:raw
-        expr: smartctl_device_attribute{attribute_id="188", attribute_value_type="raw"}
+        expr: sum by(instance, device, server, node_address, node_ip, job) (smartctl_device_attribute{attribute_id="188", attribute_value_type="raw"})
       - record: disk:pending_sectors:raw
-        expr: smartctl_device_attribute{attribute_id="197", attribute_value_type="raw"}
+        expr: sum by(instance, device, server, node_address, node_ip, job) (smartctl_device_attribute{attribute_id="197", attribute_value_type="raw"})
       - record: disk:offline_uncorrectable:raw
-        expr: smartctl_device_attribute{attribute_id="198", attribute_value_type="raw"}
+        expr: sum by(instance, device, server, node_address, node_ip, job) (smartctl_device_attribute{attribute_id="198", attribute_value_type="raw"})
       - record: disk:crc_errors:raw
-        expr: smartctl_device_attribute{attribute_id="199", attribute_value_type="raw"}
+        expr: sum by(instance, device, server, node_address, node_ip, job) (smartctl_device_attribute{attribute_id="199", attribute_value_type="raw"})
       - record: disk:temperature:celsius
         expr: smartctl_device_temperature
 
