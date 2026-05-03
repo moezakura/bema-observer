@@ -21,15 +21,16 @@ groups:
         expr: smartctl_device_temperature
 
       # 24h / 7d 増分 (ダッシュボードとアラートで共通利用)
+      # sum by(...) で入力ラベル変動 (旧 attribute_* 残存) を吸収
       - record: disk:reallocated_sectors:growth_7d
-        expr: increase(disk:reallocated_sectors:raw[7d])
+        expr: sum by(instance, device, server, node_address, node_ip, job) (increase(disk:reallocated_sectors:raw[7d]))
       - record: disk:reallocated_sectors:growth_24h
-        expr: increase(disk:reallocated_sectors:raw[24h])
+        expr: sum by(instance, device, server, node_address, node_ip, job) (increase(disk:reallocated_sectors:raw[24h]))
       - record: disk:pending_sectors:growth_7d
-        expr: increase(disk:pending_sectors:raw[7d])
+        expr: sum by(instance, device, server, node_address, node_ip, job) (increase(disk:pending_sectors:raw[7d]))
       - record: disk:pending_sectors:growth_24h
-        expr: increase(disk:pending_sectors:raw[24h])
+        expr: sum by(instance, device, server, node_address, node_ip, job) (increase(disk:pending_sectors:raw[24h]))
       - record: disk:offline_uncorrectable:growth_7d
-        expr: increase(disk:offline_uncorrectable:raw[7d])
+        expr: sum by(instance, device, server, node_address, node_ip, job) (increase(disk:offline_uncorrectable:raw[7d]))
       - record: disk:crc_errors:growth_24h
-        expr: increase(disk:crc_errors:raw[24h])
+        expr: sum by(instance, device, server, node_address, node_ip, job) (increase(disk:crc_errors:raw[24h]))
