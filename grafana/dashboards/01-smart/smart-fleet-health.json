@@ -543,81 +543,12 @@
           "expr": "topk(10, (sum by(instance, device, server) (disk:pending_sectors:growth_7d) + sum by(instance, device, server) (disk:reallocated_sectors:growth_7d) + sum by(instance, device, server) (disk:offline_uncorrectable:raw) + (sum by(instance, device, server) (disk:crc_errors:growth_24h) / 100)) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "Score",
           "legendFormat": "",
-          "instant": true,
-          "range": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "(sum by(instance, device, server) (disk:pending_sectors:growth_7d)) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
-          "refId": "PendingD",
-          "legendFormat": "",
-          "instant": true,
-          "range": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "(sum by(instance, device, server) (disk:reallocated_sectors:growth_7d)) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
-          "refId": "ReallocD",
-          "legendFormat": "",
-          "instant": true,
-          "range": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "(sum by(instance, device, server) (disk:offline_uncorrectable:raw)) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
-          "refId": "OffUnc",
-          "legendFormat": "",
-          "instant": true,
-          "range": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "(sum by(instance, device, server) (disk:crc_errors:growth_24h)) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
-          "refId": "CrcD",
-          "legendFormat": "",
-          "instant": true,
-          "range": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "(sum by(instance, device, server) (disk:temperature:celsius)) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
-          "refId": "Temp",
-          "legendFormat": "",
+          "format": "table",
           "instant": true,
           "range": false
         }
       ],
       "transformations": [
-        {
-          "id": "joinByLabels",
-          "options": {
-            "value": "Value",
-            "join": [
-              "instance",
-              "device",
-              "server",
-              "serial_number",
-              "model_family",
-              "model_name",
-              "firmware_version"
-            ]
-          }
-        },
         {
           "id": "organize",
           "options": {
@@ -632,12 +563,7 @@
               "model_family": "モデル",
               "model_name": "型番",
               "firmware_version": "FW",
-              "Value #Score": "Score",
-              "Value #PendingD": "Pending Δ(7d)",
-              "Value #ReallocD": "Realloc Δ(7d)",
-              "Value #OffUnc": "Off-Unc",
-              "Value #CrcD": "CRC Δ(24h)",
-              "Value #Temp": "Temp(°C)"
+              "Value": "Score"
             },
             "indexByName": {
               "サーバー": 0,
@@ -647,12 +573,7 @@
               "型番": 4,
               "モデル": 5,
               "FW": 6,
-              "Pending Δ(7d)": 7,
-              "Realloc Δ(7d)": 8,
-              "Off-Unc": 9,
-              "CRC Δ(24h)": 10,
-              "Temp(°C)": 11,
-              "Score": 12
+              "Score": 7
             }
           }
         },
@@ -699,100 +620,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Pending Δ(7d)"
-            },
-            "properties": [
-              {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": null
-                    },
-                    {
-                      "color": "red",
-                      "value": 1
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "mode": "basic"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Realloc Δ(7d)"
-            },
-            "properties": [
-              {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": null
-                    },
-                    {
-                      "color": "red",
-                      "value": 1
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "mode": "basic"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Off-Unc"
-            },
-            "properties": [
-              {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": null
-                    },
-                    {
-                      "color": "red",
-                      "value": 1
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "mode": "basic"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "CRC Δ(24h)"
+              "options": "Score"
             },
             "properties": [
               {
@@ -807,6 +635,10 @@
                     {
                       "color": "orange",
                       "value": 1
+                    },
+                    {
+                      "color": "red",
+                      "value": 10
                     }
                   ]
                 }
@@ -817,45 +649,6 @@
                   "type": "color-background",
                   "mode": "basic"
                 }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Temp(°C)"
-            },
-            "properties": [
-              {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": null
-                    },
-                    {
-                      "color": "orange",
-                      "value": 45
-                    },
-                    {
-                      "color": "red",
-                      "value": 50
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "mode": "gradient"
-                }
-              },
-              {
-                "id": "unit",
-                "value": "celsius"
               }
             ]
           },
