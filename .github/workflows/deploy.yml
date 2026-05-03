@@ -39,7 +39,7 @@ jobs:
         run: |
           set -euxo pipefail
           cd "$OBSERVER_DIR"
-          podman-compose up -d
+          podman compose up -d
 
       - name: Reload Prometheus rules (hot)
         run: |
