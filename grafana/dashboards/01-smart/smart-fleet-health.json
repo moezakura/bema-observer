@@ -610,8 +610,19 @@
       ],
       "transformations": [
         {
-          "id": "merge",
-          "options": {}
+          "id": "joinByLabels",
+          "options": {
+            "value": "Value",
+            "join": [
+              "instance",
+              "device",
+              "server",
+              "serial_number",
+              "model_family",
+              "model_name",
+              "firmware_version"
+            ]
+          }
         },
         {
           "id": "organize",
