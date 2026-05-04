@@ -18,7 +18,7 @@ groups:
       - record: disk:crc_errors:raw
         expr: sum by(instance, device, server, node_address, node_ip, job) (smartctl_device_attribute{attribute_id="199", attribute_value_type="raw"})
       - record: disk:temperature:celsius
-        expr: smartctl_device_temperature
+        expr: max by(instance, device, server, node_address, node_ip, job) (smartctl_device_temperature{temperature_type="current"})
 
       # 異常スコア (Worst Offenders ダッシュボード用)
       # 全 alert カテゴリを or で union し、label_replace で cat 区別、
@@ -34,7 +34,7 @@ groups:
             or label_replace((sum by(instance, device, server) (smartctl_device_smart_status)) != bool 1, "cat", "smartFail", "", "") * 1000
             or label_replace(clamp_max(sum by(instance, device, server) (disk:pending_sectors:growth_7d), 1), "cat", "pending", "", "") * 100
             or label_replace(clamp_max(sum by(instance, device, server) (disk:reallocated_sectors:growth_7d), 1), "cat", "realloc", "", "") * 100
-            or label_replace((sum by(instance, device, server) (avg_over_time(disk:temperature:celsius[1h]))) > bool 50, "cat", "temp", "", "") * 100
+            or label_replace((avg_over_time((max by(instance, device, server) (smartctl_device_temperature{temperature_type="current"}))[1h:])) > bool 50, "cat", "temp", "", "") * 100
             or label_replace((sum by(instance, device, server) (smartctl_device_percentage_used)) > bool 80, "cat", "nvmeLife", "", "") * 100
             or label_replace(clamp_max(sum by(instance, device, server) (disk:command_timeout:raw), 1), "cat", "cmdTO", "", "") * 10
             or label_replace(clamp_max(sum by(instance, device, server) (disk:crc_errors:growth_24h), 1), "cat", "crc", "", "") * 10
