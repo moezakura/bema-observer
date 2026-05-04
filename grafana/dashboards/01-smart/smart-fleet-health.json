@@ -568,6 +568,7 @@
               "model_family": "モデル",
               "model_name": "型番",
               "firmware_version": "FW",
+              "Trend #Score": "Score",
               "Value": "Score"
             },
             "indexByName": {
@@ -697,7 +698,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "topk(10, (sum by(instance, device, server) (disk:pending_sectors:growth_7d)) > 0 * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
+          "expr": "topk(10, ((sum by(instance, device, server) (disk:pending_sectors:growth_7d)) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
           "legendFormat": ""
         }
@@ -722,6 +723,7 @@
               "device": "デバイス",
               "serial_number": "シリアル",
               "model_family": "モデル",
+              "Trend #A": "値",
               "Value": "値"
             },
             "indexByName": {
@@ -831,7 +833,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "topk(10, (sum by(instance, device, server) (disk:reallocated_sectors:growth_7d)) > 0 * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
+          "expr": "topk(10, ((sum by(instance, device, server) (disk:reallocated_sectors:growth_7d)) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
           "legendFormat": ""
         }
@@ -856,6 +858,7 @@
               "device": "デバイス",
               "serial_number": "シリアル",
               "model_family": "モデル",
+              "Trend #A": "値",
               "Value": "値"
             },
             "indexByName": {
@@ -965,7 +968,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "topk(10, (sum by(instance, device, server) (disk:offline_uncorrectable:raw)) > 0 * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
+          "expr": "topk(10, ((sum by(instance, device, server) (disk:offline_uncorrectable:raw)) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
           "legendFormat": ""
         }
@@ -990,6 +993,7 @@
               "device": "デバイス",
               "serial_number": "シリアル",
               "model_family": "モデル",
+              "Trend #A": "値",
               "Value": "値"
             },
             "indexByName": {
@@ -1099,7 +1103,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "topk(10, (sum by(instance, device, server) (disk:crc_errors:growth_24h)) > 0 * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
+          "expr": "topk(10, ((sum by(instance, device, server) (disk:crc_errors:growth_24h)) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
           "legendFormat": ""
         }
@@ -1124,6 +1128,7 @@
               "device": "デバイス",
               "serial_number": "シリアル",
               "model_family": "モデル",
+              "Trend #A": "値",
               "Value": "値"
             },
             "indexByName": {
@@ -1233,7 +1238,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "topk(10, (sum by(instance, device, server) (disk:command_timeout:raw)) > 0 * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
+          "expr": "topk(10, ((sum by(instance, device, server) (disk:command_timeout:raw)) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
           "legendFormat": ""
         }
@@ -1258,6 +1263,7 @@
               "device": "デバイス",
               "serial_number": "シリアル",
               "model_family": "モデル",
+              "Trend #A": "値",
               "Value": "値"
             },
             "indexByName": {
@@ -1367,7 +1373,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "topk(10, (sum by(instance, device, server) (avg_over_time(disk:temperature:celsius[1h]))) > 0 * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
+          "expr": "topk(10, ((sum by(instance, device, server) (avg_over_time(disk:temperature:celsius[1h]))) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
           "legendFormat": ""
         }
@@ -1392,6 +1398,7 @@
               "device": "デバイス",
               "serial_number": "シリアル",
               "model_family": "モデル",
+              "Trend #A": "値",
               "Value": "値"
             },
             "indexByName": {
