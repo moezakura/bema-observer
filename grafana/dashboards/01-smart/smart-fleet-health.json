@@ -543,7 +543,9 @@
           "expr": "topk(10, (disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "Score",
           "legendFormat": "",
-          "format": "table"
+          "format": "table",
+          "instant": true,
+          "range": false
         }
       ],
       "transformations": [
