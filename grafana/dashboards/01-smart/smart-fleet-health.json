@@ -649,7 +649,7 @@
           "id": "joinByField",
           "options": {
             "byField": "_key",
-            "mode": "outerTabular"
+            "mode": "outer"
           }
         },
         {

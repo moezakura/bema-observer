@@ -228,7 +228,7 @@ worst_queries = [
     target(metric_col(TEMP_CURRENT_AVG_1H), legend="", fmt="table", instant=True, ref="Temp"),
 ]
 worst_transforms = [
-    {"id": "joinByField", "options": {"byField": "_key", "mode": "outerTabular"}},
+    {"id": "joinByField", "options": {"byField": "_key", "mode": "outer"}},
     {"id": "organize", "options": {
         "excludeByName": {"Time": True, "__name__": True, "_key": True},
         "renameByName": {
