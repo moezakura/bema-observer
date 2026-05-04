@@ -603,8 +603,42 @@
               {
                 "fieldName": "Value (last)",
                 "handlerKey": "field.value"
+              },
+              {
+                "fieldName": "instance",
+                "handlerKey": "field.label"
+              },
+              {
+                "fieldName": "device",
+                "handlerKey": "field.label"
+              },
+              {
+                "fieldName": "server",
+                "handlerKey": "field.label"
+              },
+              {
+                "fieldName": "serial_number",
+                "handlerKey": "field.label"
+              },
+              {
+                "fieldName": "model_family",
+                "handlerKey": "field.label"
+              },
+              {
+                "fieldName": "model_name",
+                "handlerKey": "field.label"
+              },
+              {
+                "fieldName": "firmware_version",
+                "handlerKey": "field.label"
               }
             ]
+          }
+        },
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
           }
         },
         {
