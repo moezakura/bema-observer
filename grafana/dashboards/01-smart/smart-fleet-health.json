@@ -638,16 +638,25 @@
           "options": {}
         },
         {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": ".*"
+            }
+          }
+        },
+        {
           "id": "organize",
           "options": {
             "excludeByName": {
-              "instance": true,
+              "Time": true,
               "model_name": true,
               "firmware_version": true
             },
             "renameByName": {
               "server": "サーバー",
               "device": "デバイス",
+              "instance": "IP",
               "serial_number": "シリアル",
               "model_family": "モデル",
               "Value #PendingD": "Pending Δ(7d)",
@@ -661,17 +670,18 @@
             },
             "indexByName": {
               "サーバー": 0,
-              "デバイス": 1,
-              "シリアル": 2,
-              "モデル": 3,
-              "Pending Δ(7d)": 4,
-              "Realloc Δ(7d)": 5,
-              "Off-Unc": 6,
-              "Reported-Unc": 7,
-              "CRC Δ(24h)": 8,
-              "Cmd Timeout": 9,
-              "SCSI defect": 10,
-              "Temp(°C)": 11
+              "IP": 1,
+              "デバイス": 2,
+              "シリアル": 3,
+              "モデル": 4,
+              "Pending Δ(7d)": 5,
+              "Realloc Δ(7d)": 6,
+              "Off-Unc": 7,
+              "Reported-Unc": 8,
+              "CRC Δ(24h)": 9,
+              "Cmd Timeout": 10,
+              "SCSI defect": 11,
+              "Temp(°C)": 12
             }
           }
         },
