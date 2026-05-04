@@ -32,7 +32,7 @@ jobs:
         run: |
           set -euxo pipefail
           cd "$OBSERVER_DIR"
-          podman run --rm --entrypoint promtool \
+          sudo -n podman run --rm --entrypoint promtool \
             -v ./prometheus:/etc/prometheus:ro \
             docker.io/prom/prometheus:v3.6.0 check config /etc/prometheus/prometheus.yml
 
