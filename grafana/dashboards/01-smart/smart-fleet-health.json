@@ -523,7 +523,7 @@
     {
       "id": 9,
       "type": "table",
-      "title": "Worst offenders top 10 (composite score)",
+      "title": "Worst offenders top 10",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -532,7 +532,7 @@
         "x": 0,
         "y": 6,
         "w": 24,
-        "h": 8
+        "h": 12
       },
       "targets": [
         {
@@ -540,8 +540,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "topk(10, (disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
-          "refId": "Score",
+          "expr": "((label_replace(sum by(instance, device, server) (disk:pending_sectors:growth_7d), \"cat\", \"PendingD\", \"\", \"\") or label_replace(sum by(instance, device, server) (disk:reallocated_sectors:growth_7d), \"cat\", \"ReallocD\", \"\", \"\") or label_replace(sum by(instance, device, server) (disk:offline_uncorrectable:raw), \"cat\", \"OffUnc\", \"\", \"\") or label_replace(sum by(instance, device, server) (disk:reported_uncorrectable:raw), \"cat\", \"ReportUnc\", \"\", \"\") or label_replace(sum by(instance, device, server) (disk:crc_errors:growth_24h), \"cat\", \"CrcD\", \"\", \"\") or label_replace(sum by(instance, device, server) (disk:command_timeout:raw), \"cat\", \"CmdTO\", \"\", \"\") or label_replace(sum by(instance, device, server) (smartctl_scsi_grown_defect_list), \"cat\", \"ScsiDef\", \"\", \"\") or label_replace((sum by(instance, device, server) (avg_over_time(disk:temperature:celsius[1h]))), \"cat\", \"Temp\", \"\", \"\")) and on(instance, device) topk(10, disk:anomaly:score > 0)) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
+          "refId": "A",
           "legendFormat": "",
           "format": "table"
         }
@@ -579,6 +579,10 @@
                 "aggregations": [],
                 "operation": "groupby"
               },
+              "cat": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
               "Value": {
                 "aggregations": [
                   "last"
@@ -589,30 +593,55 @@
           }
         },
         {
+          "id": "rowsToFields",
+          "options": {
+            "mappings": [
+              {
+                "fieldName": "cat",
+                "handlerKey": "field.name"
+              },
+              {
+                "fieldName": "Value (last)",
+                "handlerKey": "field.value"
+              }
+            ]
+          }
+        },
+        {
           "id": "organize",
           "options": {
             "excludeByName": {
-              "Time": true
+              "instance": true,
+              "model_name": true,
+              "firmware_version": true
             },
             "renameByName": {
               "server": "サーバー",
-              "instance": "IP",
               "device": "デバイス",
               "serial_number": "シリアル",
               "model_family": "モデル",
-              "model_name": "型番",
-              "firmware_version": "FW",
-              "Value (last)": "Score"
+              "PendingD": "Pending Δ(7d)",
+              "ReallocD": "Realloc Δ(7d)",
+              "OffUnc": "Off-Unc",
+              "ReportUnc": "Reported-Unc",
+              "CrcD": "CRC Δ(24h)",
+              "CmdTO": "Cmd Timeout",
+              "ScsiDef": "SCSI defect",
+              "Temp": "Temp(°C)"
             },
             "indexByName": {
               "サーバー": 0,
-              "IP": 1,
-              "デバイス": 2,
-              "シリアル": 3,
-              "型番": 4,
-              "モデル": 5,
-              "FW": 6,
-              "Score": 7
+              "デバイス": 1,
+              "シリアル": 2,
+              "モデル": 3,
+              "Pending Δ(7d)": 4,
+              "Realloc Δ(7d)": 5,
+              "Off-Unc": 6,
+              "Reported-Unc": 7,
+              "CRC Δ(24h)": 8,
+              "Cmd Timeout": 9,
+              "SCSI defect": 10,
+              "Temp(°C)": 11
             }
           }
         },
@@ -622,7 +651,19 @@
             "fields": {},
             "sort": [
               {
-                "field": "Score",
+                "field": "Pending Δ(7d)",
+                "desc": true
+              },
+              {
+                "field": "Realloc Δ(7d)",
+                "desc": true
+              },
+              {
+                "field": "Reported-Unc",
+                "desc": true
+              },
+              {
+                "field": "Temp(°C)",
                 "desc": true
               }
             ]
@@ -659,7 +700,162 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Score"
+              "options": "Pending Δ(7d)"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Realloc Δ(7d)"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Off-Unc"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reported-Unc"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SCSI defect"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CRC Δ(24h)"
             },
             "properties": [
               {
@@ -673,11 +869,7 @@
                     },
                     {
                       "color": "orange",
-                      "value": 10
-                    },
-                    {
-                      "color": "red",
-                      "value": 1000
+                      "value": 1
                     }
                   ]
                 }
@@ -688,6 +880,76 @@
                   "type": "color-background",
                   "mode": "basic"
                 }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cmd Timeout"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temp(°C)"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 45
+                    },
+                    {
+                      "color": "red",
+                      "value": 50
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "gradient"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "celsius"
               }
             ]
           },
@@ -713,1049 +975,19 @@
     },
     {
       "id": 10,
-      "type": "table",
-      "title": "Pending Δ (7d) top10",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 14,
-        "w": 8,
-        "h": 8
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "topk(10, ((sum by(instance, device, server) (disk:pending_sectors:growth_7d)) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
-          "refId": "A",
-          "legendFormat": "",
-          "format": "table"
-        }
-      ],
-      "transformations": [
-        {
-          "id": "groupBy",
-          "options": {
-            "fields": {
-              "instance": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "device": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "server": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "serial_number": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "model_family": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "model_name": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "firmware_version": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "Value": {
-                "aggregations": [
-                  "last"
-                ],
-                "operation": "aggregate"
-              }
-            }
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "instance": true,
-              "model_name": true,
-              "firmware_version": true
-            },
-            "renameByName": {
-              "server": "サーバー",
-              "device": "デバイス",
-              "serial_number": "シリアル",
-              "model_family": "モデル",
-              "Value (last)": "値"
-            },
-            "indexByName": {
-              "サーバー": 0,
-              "デバイス": 1,
-              "シリアル": 2,
-              "モデル": 3,
-              "値": 4
-            }
-          }
-        },
-        {
-          "id": "sortBy",
-          "options": {
-            "fields": {},
-            "sort": [
-              {
-                "field": "値",
-                "desc": true
-              }
-            ]
-          }
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "cellHeight": "sm"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "filterable": true
-          },
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "値"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "short"
-              },
-              {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": null
-                    },
-                    {
-                      "color": "red",
-                      "value": 1
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "mode": "basic"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": 11,
-      "type": "table",
-      "title": "Reallocated Δ (7d) top10",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 8,
-        "y": 14,
-        "w": 8,
-        "h": 8
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "topk(10, ((sum by(instance, device, server) (disk:reallocated_sectors:growth_7d)) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
-          "refId": "A",
-          "legendFormat": "",
-          "format": "table"
-        }
-      ],
-      "transformations": [
-        {
-          "id": "groupBy",
-          "options": {
-            "fields": {
-              "instance": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "device": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "server": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "serial_number": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "model_family": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "model_name": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "firmware_version": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "Value": {
-                "aggregations": [
-                  "last"
-                ],
-                "operation": "aggregate"
-              }
-            }
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "instance": true,
-              "model_name": true,
-              "firmware_version": true
-            },
-            "renameByName": {
-              "server": "サーバー",
-              "device": "デバイス",
-              "serial_number": "シリアル",
-              "model_family": "モデル",
-              "Value (last)": "値"
-            },
-            "indexByName": {
-              "サーバー": 0,
-              "デバイス": 1,
-              "シリアル": 2,
-              "モデル": 3,
-              "値": 4
-            }
-          }
-        },
-        {
-          "id": "sortBy",
-          "options": {
-            "fields": {},
-            "sort": [
-              {
-                "field": "値",
-                "desc": true
-              }
-            ]
-          }
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "cellHeight": "sm"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "filterable": true
-          },
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "値"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "short"
-              },
-              {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": null
-                    },
-                    {
-                      "color": "red",
-                      "value": 1
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "mode": "basic"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": 12,
-      "type": "table",
-      "title": "Offline uncorrectable top10",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 16,
-        "y": 14,
-        "w": 8,
-        "h": 8
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "topk(10, ((sum by(instance, device, server) (disk:offline_uncorrectable:raw)) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
-          "refId": "A",
-          "legendFormat": "",
-          "format": "table"
-        }
-      ],
-      "transformations": [
-        {
-          "id": "groupBy",
-          "options": {
-            "fields": {
-              "instance": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "device": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "server": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "serial_number": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "model_family": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "model_name": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "firmware_version": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "Value": {
-                "aggregations": [
-                  "last"
-                ],
-                "operation": "aggregate"
-              }
-            }
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "instance": true,
-              "model_name": true,
-              "firmware_version": true
-            },
-            "renameByName": {
-              "server": "サーバー",
-              "device": "デバイス",
-              "serial_number": "シリアル",
-              "model_family": "モデル",
-              "Value (last)": "値"
-            },
-            "indexByName": {
-              "サーバー": 0,
-              "デバイス": 1,
-              "シリアル": 2,
-              "モデル": 3,
-              "値": 4
-            }
-          }
-        },
-        {
-          "id": "sortBy",
-          "options": {
-            "fields": {},
-            "sort": [
-              {
-                "field": "値",
-                "desc": true
-              }
-            ]
-          }
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "cellHeight": "sm"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "filterable": true
-          },
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "値"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "short"
-              },
-              {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": null
-                    },
-                    {
-                      "color": "red",
-                      "value": 1
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "mode": "basic"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": 13,
-      "type": "table",
-      "title": "CRC errors Δ (24h) top10",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 22,
-        "w": 8,
-        "h": 8
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "topk(10, ((sum by(instance, device, server) (disk:crc_errors:growth_24h)) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
-          "refId": "A",
-          "legendFormat": "",
-          "format": "table"
-        }
-      ],
-      "transformations": [
-        {
-          "id": "groupBy",
-          "options": {
-            "fields": {
-              "instance": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "device": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "server": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "serial_number": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "model_family": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "model_name": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "firmware_version": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "Value": {
-                "aggregations": [
-                  "last"
-                ],
-                "operation": "aggregate"
-              }
-            }
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "instance": true,
-              "model_name": true,
-              "firmware_version": true
-            },
-            "renameByName": {
-              "server": "サーバー",
-              "device": "デバイス",
-              "serial_number": "シリアル",
-              "model_family": "モデル",
-              "Value (last)": "値"
-            },
-            "indexByName": {
-              "サーバー": 0,
-              "デバイス": 1,
-              "シリアル": 2,
-              "モデル": 3,
-              "値": 4
-            }
-          }
-        },
-        {
-          "id": "sortBy",
-          "options": {
-            "fields": {},
-            "sort": [
-              {
-                "field": "値",
-                "desc": true
-              }
-            ]
-          }
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "cellHeight": "sm"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "filterable": true
-          },
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "値"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "short"
-              },
-              {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": null
-                    },
-                    {
-                      "color": "orange",
-                      "value": 1
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "mode": "basic"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": 14,
-      "type": "table",
-      "title": "Command timeout (id=188) raw top10",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 8,
-        "y": 22,
-        "w": 8,
-        "h": 8
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "topk(10, ((sum by(instance, device, server) (disk:command_timeout:raw)) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
-          "refId": "A",
-          "legendFormat": "",
-          "format": "table"
-        }
-      ],
-      "transformations": [
-        {
-          "id": "groupBy",
-          "options": {
-            "fields": {
-              "instance": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "device": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "server": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "serial_number": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "model_family": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "model_name": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "firmware_version": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "Value": {
-                "aggregations": [
-                  "last"
-                ],
-                "operation": "aggregate"
-              }
-            }
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "instance": true,
-              "model_name": true,
-              "firmware_version": true
-            },
-            "renameByName": {
-              "server": "サーバー",
-              "device": "デバイス",
-              "serial_number": "シリアル",
-              "model_family": "モデル",
-              "Value (last)": "値"
-            },
-            "indexByName": {
-              "サーバー": 0,
-              "デバイス": 1,
-              "シリアル": 2,
-              "モデル": 3,
-              "値": 4
-            }
-          }
-        },
-        {
-          "id": "sortBy",
-          "options": {
-            "fields": {},
-            "sort": [
-              {
-                "field": "値",
-                "desc": true
-              }
-            ]
-          }
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "cellHeight": "sm"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "filterable": true
-          },
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "値"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "short"
-              },
-              {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": null
-                    },
-                    {
-                      "color": "orange",
-                      "value": 1
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "mode": "basic"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": 15,
-      "type": "table",
-      "title": "Temperature (avg 1h) top10",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 16,
-        "y": 22,
-        "w": 8,
-        "h": 8
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "topk(10, ((sum by(instance, device, server) (avg_over_time(disk:temperature:celsius[1h]))) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
-          "refId": "A",
-          "legendFormat": "",
-          "format": "table"
-        }
-      ],
-      "transformations": [
-        {
-          "id": "groupBy",
-          "options": {
-            "fields": {
-              "instance": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "device": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "server": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "serial_number": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "model_family": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "model_name": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "firmware_version": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "Value": {
-                "aggregations": [
-                  "last"
-                ],
-                "operation": "aggregate"
-              }
-            }
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "instance": true,
-              "model_name": true,
-              "firmware_version": true
-            },
-            "renameByName": {
-              "server": "サーバー",
-              "device": "デバイス",
-              "serial_number": "シリアル",
-              "model_family": "モデル",
-              "Value (last)": "値"
-            },
-            "indexByName": {
-              "サーバー": 0,
-              "デバイス": 1,
-              "シリアル": 2,
-              "モデル": 3,
-              "値": 4
-            }
-          }
-        },
-        {
-          "id": "sortBy",
-          "options": {
-            "fields": {},
-            "sort": [
-              {
-                "field": "値",
-                "desc": true
-              }
-            ]
-          }
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "cellHeight": "sm"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "filterable": true
-          },
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "値"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "celsius"
-              },
-              {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": null
-                    },
-                    {
-                      "color": "orange",
-                      "value": 45
-                    },
-                    {
-                      "color": "red",
-                      "value": 50
-                    }
-                  ]
-                }
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "mode": "basic"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": 16,
       "type": "row",
       "title": "Section 3a: SATA HDD/SSD trends",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 30,
+        "y": 18,
         "w": 24,
         "h": 1
       },
       "panels": []
     },
     {
-      "id": 17,
+      "id": 11,
       "type": "timeseries",
       "title": "Pending sectors daily Δ (top10)",
       "datasource": {
@@ -1764,7 +996,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 31,
+        "y": 19,
         "w": 12,
         "h": 8
       },
@@ -1815,7 +1047,7 @@
       }
     },
     {
-      "id": 18,
+      "id": 12,
       "type": "timeseries",
       "title": "Reallocated sectors daily Δ (top10)",
       "datasource": {
@@ -1824,7 +1056,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 31,
+        "y": 19,
         "w": 12,
         "h": 8
       },
@@ -1875,7 +1107,7 @@
       }
     },
     {
-      "id": 19,
+      "id": 13,
       "type": "timeseries",
       "title": "CRC errors daily Δ (cable health, top10)",
       "datasource": {
@@ -1884,7 +1116,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 39,
+        "y": 27,
         "w": 12,
         "h": 8
       },
@@ -1935,7 +1167,7 @@
       }
     },
     {
-      "id": 20,
+      "id": 14,
       "type": "heatmap",
       "title": "Temperature distribution (all SATA)",
       "datasource": {
@@ -1944,7 +1176,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 39,
+        "y": 27,
         "w": 12,
         "h": 8
       },
@@ -1984,20 +1216,20 @@
       }
     },
     {
-      "id": 21,
+      "id": 15,
       "type": "row",
       "title": "Section 3b: NVMe health",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 47,
+        "y": 35,
         "w": 24,
         "h": 1
       },
       "panels": []
     },
     {
-      "id": 22,
+      "id": 16,
       "type": "bargauge",
       "title": "NVMe percentage_used",
       "datasource": {
@@ -2006,7 +1238,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 48,
+        "y": 36,
         "w": 12,
         "h": 8
       },
@@ -2064,7 +1296,7 @@
       }
     },
     {
-      "id": 23,
+      "id": 17,
       "type": "bargauge",
       "title": "NVMe available_spare (vs threshold)",
       "datasource": {
@@ -2073,7 +1305,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 48,
+        "y": 36,
         "w": 12,
         "h": 8
       },
@@ -2142,7 +1374,7 @@
       }
     },
     {
-      "id": 24,
+      "id": 18,
       "type": "stat",
       "title": "media_and_data_integrity_errors",
       "datasource": {
@@ -2151,7 +1383,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 56,
+        "y": 44,
         "w": 12,
         "h": 4
       },
@@ -2207,7 +1439,7 @@
       }
     },
     {
-      "id": 25,
+      "id": 19,
       "type": "stat",
       "title": "unsafe_shutdowns (informational)",
       "datasource": {
@@ -2216,7 +1448,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 56,
+        "y": 44,
         "w": 12,
         "h": 4
       },
@@ -2268,19 +1500,19 @@
       }
     },
     {
-      "id": 29,
+      "id": 23,
       "type": "row",
       "title": "Section 3c: SAS health (折りたたみ)",
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 60,
+        "y": 48,
         "w": 24,
         "h": 1
       },
       "panels": [
         {
-          "id": 26,
+          "id": 20,
           "type": "timeseries",
           "title": "SAS Grown defect list",
           "datasource": {
@@ -2289,7 +1521,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 61,
+            "y": 49,
             "w": 8,
             "h": 8
           },
@@ -2340,7 +1572,7 @@
           }
         },
         {
-          "id": 27,
+          "id": 21,
           "type": "timeseries",
           "title": "SAS Read uncorrected total",
           "datasource": {
@@ -2349,7 +1581,7 @@
           },
           "gridPos": {
             "x": 8,
-            "y": 61,
+            "y": 49,
             "w": 8,
             "h": 8
           },
@@ -2400,7 +1632,7 @@
           }
         },
         {
-          "id": 28,
+          "id": 22,
           "type": "timeseries",
           "title": "SAS Write uncorrected total",
           "datasource": {
@@ -2409,7 +1641,7 @@
           },
           "gridPos": {
             "x": 16,
-            "y": 61,
+            "y": 49,
             "w": 8,
             "h": 8
           },
@@ -2462,19 +1694,19 @@
       ]
     },
     {
-      "id": 32,
+      "id": 26,
       "type": "row",
       "title": "Section 4: Per-server drilldown ($server を絞ると展開)",
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 61,
+        "y": 49,
         "w": 24,
         "h": 1
       },
       "panels": [
         {
-          "id": 30,
+          "id": 24,
           "type": "table",
           "title": "Drive inventory ($server)",
           "datasource": {
@@ -2483,7 +1715,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 62,
+            "y": 50,
             "w": 24,
             "h": 10
           },
@@ -2654,7 +1886,7 @@
           }
         },
         {
-          "id": 31,
+          "id": 25,
           "type": "timeseries",
           "title": "All raw attributes (selected device)",
           "datasource": {
@@ -2663,7 +1895,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 72,
+            "y": 60,
             "w": 24,
             "h": 10
           },
@@ -2715,20 +1947,20 @@
       ]
     },
     {
-      "id": 33,
+      "id": 27,
       "type": "row",
       "title": "Section 5: Lifetime & capacity (informational)",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 62,
+        "y": 50,
         "w": 24,
         "h": 1
       },
       "panels": []
     },
     {
-      "id": 34,
+      "id": 28,
       "type": "bargauge",
       "title": "Power_On_Hours (per drive)",
       "datasource": {
@@ -2737,7 +1969,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 63,
+        "y": 51,
         "w": 12,
         "h": 10
       },
@@ -2794,7 +2026,7 @@
       }
     },
     {
-      "id": 35,
+      "id": 29,
       "type": "bargauge",
       "title": "Power cycle count",
       "datasource": {
@@ -2803,7 +2035,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 63,
+        "y": 51,
         "w": 12,
         "h": 10
       },
@@ -2852,7 +2084,7 @@
       }
     },
     {
-      "id": 36,
+      "id": 30,
       "type": "timeseries",
       "title": "Bytes written (cumulative)",
       "datasource": {
@@ -2861,7 +2093,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 73,
+        "y": 61,
         "w": 12,
         "h": 8
       },
@@ -2911,7 +2143,7 @@
       }
     },
     {
-      "id": 37,
+      "id": 31,
       "type": "bargauge",
       "title": "Capacity by server",
       "datasource": {
@@ -2920,7 +2152,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 73,
+        "y": 61,
         "w": 12,
         "h": 8
       },
