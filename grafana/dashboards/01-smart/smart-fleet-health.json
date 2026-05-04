@@ -652,8 +652,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background",
-                  "mode": "basic"
+                  "type": "sparkline",
+                  "hideValue": false
                 }
               }
             ]
@@ -804,8 +804,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background",
-                  "mode": "basic"
+                  "type": "sparkline",
+                  "hideValue": false
                 }
               }
             ]
@@ -939,8 +939,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background",
-                  "mode": "basic"
+                  "type": "sparkline",
+                  "hideValue": false
                 }
               }
             ]
@@ -1074,8 +1074,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background",
-                  "mode": "basic"
+                  "type": "sparkline",
+                  "hideValue": false
                 }
               }
             ]
@@ -1209,8 +1209,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background",
-                  "mode": "basic"
+                  "type": "sparkline",
+                  "hideValue": false
                 }
               }
             ]
@@ -1344,8 +1344,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background",
-                  "mode": "basic"
+                  "type": "sparkline",
+                  "hideValue": false
                 }
               }
             ]
@@ -1483,8 +1483,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background",
-                  "mode": "basic"
+                  "type": "sparkline",
+                  "hideValue": false
                 }
               }
             ]
