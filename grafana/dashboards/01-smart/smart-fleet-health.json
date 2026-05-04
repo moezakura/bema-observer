@@ -542,15 +542,49 @@
           },
           "expr": "topk(10, (disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "Score",
-          "legendFormat": ""
+          "legendFormat": "",
+          "format": "table"
         }
       ],
       "transformations": [
         {
-          "id": "timeSeriesTable",
+          "id": "groupBy",
           "options": {
-            "Score": {
-              "stat": "lastNotNull"
+            "fields": {
+              "instance": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "device": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "server": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "serial_number": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "model_family": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "model_name": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "firmware_version": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Value": {
+                "aggregations": [
+                  "last"
+                ],
+                "operation": "aggregate"
+              }
             }
           }
         },
@@ -568,8 +602,7 @@
               "model_family": "モデル",
               "model_name": "型番",
               "firmware_version": "FW",
-              "Trend #Score": "Score",
-              "Value": "Score"
+              "Value (last)": "Score"
             },
             "indexByName": {
               "サーバー": 0,
@@ -652,8 +685,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "sparkline",
-                  "hideValue": false
+                  "type": "color-background",
+                  "mode": "basic"
                 }
               }
             ]
@@ -700,15 +733,49 @@
           },
           "expr": "topk(10, ((sum by(instance, device, server) (disk:pending_sectors:growth_7d)) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
-          "legendFormat": ""
+          "legendFormat": "",
+          "format": "table"
         }
       ],
       "transformations": [
         {
-          "id": "timeSeriesTable",
+          "id": "groupBy",
           "options": {
-            "A": {
-              "stat": "lastNotNull"
+            "fields": {
+              "instance": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "device": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "server": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "serial_number": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "model_family": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "model_name": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "firmware_version": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Value": {
+                "aggregations": [
+                  "last"
+                ],
+                "operation": "aggregate"
+              }
             }
           }
         },
@@ -716,15 +783,17 @@
           "id": "organize",
           "options": {
             "excludeByName": {
-              "Time": true
+              "Time": true,
+              "instance": true,
+              "model_name": true,
+              "firmware_version": true
             },
             "renameByName": {
               "server": "サーバー",
               "device": "デバイス",
               "serial_number": "シリアル",
               "model_family": "モデル",
-              "Trend #A": "値",
-              "Value": "値"
+              "Value (last)": "値"
             },
             "indexByName": {
               "サーバー": 0,
@@ -804,8 +873,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "sparkline",
-                  "hideValue": false
+                  "type": "color-background",
+                  "mode": "basic"
                 }
               }
             ]
@@ -835,15 +904,49 @@
           },
           "expr": "topk(10, ((sum by(instance, device, server) (disk:reallocated_sectors:growth_7d)) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
-          "legendFormat": ""
+          "legendFormat": "",
+          "format": "table"
         }
       ],
       "transformations": [
         {
-          "id": "timeSeriesTable",
+          "id": "groupBy",
           "options": {
-            "A": {
-              "stat": "lastNotNull"
+            "fields": {
+              "instance": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "device": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "server": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "serial_number": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "model_family": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "model_name": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "firmware_version": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Value": {
+                "aggregations": [
+                  "last"
+                ],
+                "operation": "aggregate"
+              }
             }
           }
         },
@@ -851,15 +954,17 @@
           "id": "organize",
           "options": {
             "excludeByName": {
-              "Time": true
+              "Time": true,
+              "instance": true,
+              "model_name": true,
+              "firmware_version": true
             },
             "renameByName": {
               "server": "サーバー",
               "device": "デバイス",
               "serial_number": "シリアル",
               "model_family": "モデル",
-              "Trend #A": "値",
-              "Value": "値"
+              "Value (last)": "値"
             },
             "indexByName": {
               "サーバー": 0,
@@ -939,8 +1044,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "sparkline",
-                  "hideValue": false
+                  "type": "color-background",
+                  "mode": "basic"
                 }
               }
             ]
@@ -970,15 +1075,49 @@
           },
           "expr": "topk(10, ((sum by(instance, device, server) (disk:offline_uncorrectable:raw)) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
-          "legendFormat": ""
+          "legendFormat": "",
+          "format": "table"
         }
       ],
       "transformations": [
         {
-          "id": "timeSeriesTable",
+          "id": "groupBy",
           "options": {
-            "A": {
-              "stat": "lastNotNull"
+            "fields": {
+              "instance": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "device": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "server": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "serial_number": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "model_family": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "model_name": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "firmware_version": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Value": {
+                "aggregations": [
+                  "last"
+                ],
+                "operation": "aggregate"
+              }
             }
           }
         },
@@ -986,15 +1125,17 @@
           "id": "organize",
           "options": {
             "excludeByName": {
-              "Time": true
+              "Time": true,
+              "instance": true,
+              "model_name": true,
+              "firmware_version": true
             },
             "renameByName": {
               "server": "サーバー",
               "device": "デバイス",
               "serial_number": "シリアル",
               "model_family": "モデル",
-              "Trend #A": "値",
-              "Value": "値"
+              "Value (last)": "値"
             },
             "indexByName": {
               "サーバー": 0,
@@ -1074,8 +1215,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "sparkline",
-                  "hideValue": false
+                  "type": "color-background",
+                  "mode": "basic"
                 }
               }
             ]
@@ -1105,15 +1246,49 @@
           },
           "expr": "topk(10, ((sum by(instance, device, server) (disk:crc_errors:growth_24h)) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
-          "legendFormat": ""
+          "legendFormat": "",
+          "format": "table"
         }
       ],
       "transformations": [
         {
-          "id": "timeSeriesTable",
+          "id": "groupBy",
           "options": {
-            "A": {
-              "stat": "lastNotNull"
+            "fields": {
+              "instance": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "device": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "server": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "serial_number": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "model_family": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "model_name": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "firmware_version": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Value": {
+                "aggregations": [
+                  "last"
+                ],
+                "operation": "aggregate"
+              }
             }
           }
         },
@@ -1121,15 +1296,17 @@
           "id": "organize",
           "options": {
             "excludeByName": {
-              "Time": true
+              "Time": true,
+              "instance": true,
+              "model_name": true,
+              "firmware_version": true
             },
             "renameByName": {
               "server": "サーバー",
               "device": "デバイス",
               "serial_number": "シリアル",
               "model_family": "モデル",
-              "Trend #A": "値",
-              "Value": "値"
+              "Value (last)": "値"
             },
             "indexByName": {
               "サーバー": 0,
@@ -1209,8 +1386,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "sparkline",
-                  "hideValue": false
+                  "type": "color-background",
+                  "mode": "basic"
                 }
               }
             ]
@@ -1240,15 +1417,49 @@
           },
           "expr": "topk(10, ((sum by(instance, device, server) (disk:command_timeout:raw)) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
-          "legendFormat": ""
+          "legendFormat": "",
+          "format": "table"
         }
       ],
       "transformations": [
         {
-          "id": "timeSeriesTable",
+          "id": "groupBy",
           "options": {
-            "A": {
-              "stat": "lastNotNull"
+            "fields": {
+              "instance": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "device": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "server": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "serial_number": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "model_family": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "model_name": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "firmware_version": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Value": {
+                "aggregations": [
+                  "last"
+                ],
+                "operation": "aggregate"
+              }
             }
           }
         },
@@ -1256,15 +1467,17 @@
           "id": "organize",
           "options": {
             "excludeByName": {
-              "Time": true
+              "Time": true,
+              "instance": true,
+              "model_name": true,
+              "firmware_version": true
             },
             "renameByName": {
               "server": "サーバー",
               "device": "デバイス",
               "serial_number": "シリアル",
               "model_family": "モデル",
-              "Trend #A": "値",
-              "Value": "値"
+              "Value (last)": "値"
             },
             "indexByName": {
               "サーバー": 0,
@@ -1344,8 +1557,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "sparkline",
-                  "hideValue": false
+                  "type": "color-background",
+                  "mode": "basic"
                 }
               }
             ]
@@ -1375,15 +1588,49 @@
           },
           "expr": "topk(10, ((sum by(instance, device, server) (avg_over_time(disk:temperature:celsius[1h]))) > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
-          "legendFormat": ""
+          "legendFormat": "",
+          "format": "table"
         }
       ],
       "transformations": [
         {
-          "id": "timeSeriesTable",
+          "id": "groupBy",
           "options": {
-            "A": {
-              "stat": "lastNotNull"
+            "fields": {
+              "instance": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "device": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "server": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "serial_number": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "model_family": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "model_name": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "firmware_version": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Value": {
+                "aggregations": [
+                  "last"
+                ],
+                "operation": "aggregate"
+              }
             }
           }
         },
@@ -1391,15 +1638,17 @@
           "id": "organize",
           "options": {
             "excludeByName": {
-              "Time": true
+              "Time": true,
+              "instance": true,
+              "model_name": true,
+              "firmware_version": true
             },
             "renameByName": {
               "server": "サーバー",
               "device": "デバイス",
               "serial_number": "シリアル",
               "model_family": "モデル",
-              "Trend #A": "値",
-              "Value": "値"
+              "Value (last)": "値"
             },
             "indexByName": {
               "サーバー": 0,
@@ -1483,8 +1732,8 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "sparkline",
-                  "hideValue": false
+                  "type": "color-background",
+                  "mode": "basic"
                 }
               }
             ]
