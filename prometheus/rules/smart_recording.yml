@@ -20,6 +20,26 @@ groups:
       - record: disk:temperature:celsius
         expr: smartctl_device_temperature
 
+      # 異常スコア (Worst Offenders ダッシュボード用)
+      # 全 alert カテゴリを or で union し、label_replace で cat 区別、
+      # sum by(...) で重み付き加算。重み: 1000=critical / 100=high / 10=warning
+      - record: disk:anomaly:score
+        expr: |
+          sum by(instance, device, server) (
+            label_replace(clamp_max(sum by(instance, device, server) (disk:offline_uncorrectable:raw), 1), "cat", "offUnc", "", "") * 1000
+            or label_replace(clamp_max(sum by(instance, device, server) (disk:reported_uncorrectable:raw), 1), "cat", "reportUnc", "", "") * 1000
+            or label_replace(clamp_max(sum by(instance, device, server) (smartctl_scsi_grown_defect_list), 1), "cat", "scsi", "", "") * 1000
+            or label_replace((sum by(instance, device, server) (smartctl_device_critical_warning)) != bool 0, "cat", "nvmeCrit", "", "") * 1000
+            or label_replace(clamp_max(sum by(instance, device, server) (smartctl_device_media_errors), 1), "cat", "nvmeMedia", "", "") * 1000
+            or label_replace((sum by(instance, device, server) (smartctl_device_smart_status)) != bool 1, "cat", "smartFail", "", "") * 1000
+            or label_replace(clamp_max(sum by(instance, device, server) (disk:pending_sectors:growth_7d), 1), "cat", "pending", "", "") * 100
+            or label_replace(clamp_max(sum by(instance, device, server) (disk:reallocated_sectors:growth_7d), 1), "cat", "realloc", "", "") * 100
+            or label_replace((sum by(instance, device, server) (avg_over_time(disk:temperature:celsius[1h]))) > bool 50, "cat", "temp", "", "") * 100
+            or label_replace((sum by(instance, device, server) (smartctl_device_percentage_used)) > bool 80, "cat", "nvmeLife", "", "") * 100
+            or label_replace(clamp_max(sum by(instance, device, server) (disk:command_timeout:raw), 1), "cat", "cmdTO", "", "") * 10
+            or label_replace(clamp_max(sum by(instance, device, server) (disk:crc_errors:growth_24h), 1), "cat", "crc", "", "") * 10
+          )
+
       # 24h / 7d 増分 (ダッシュボードとアラートで共通利用)
       # sum by(...) で入力ラベル変動 (旧 attribute_* 残存) を吸収
       - record: disk:reallocated_sectors:growth_7d
