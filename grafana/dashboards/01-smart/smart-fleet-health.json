@@ -540,8 +540,78 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "((label_replace(sum by(instance, device, server) (disk:pending_sectors:growth_7d), \"cat\", \"PendingD\", \"\", \"\") or label_replace(sum by(instance, device, server) (disk:reallocated_sectors:growth_7d), \"cat\", \"ReallocD\", \"\", \"\") or label_replace(sum by(instance, device, server) (disk:offline_uncorrectable:raw), \"cat\", \"OffUnc\", \"\", \"\") or label_replace(sum by(instance, device, server) (disk:reported_uncorrectable:raw), \"cat\", \"ReportUnc\", \"\", \"\") or label_replace(sum by(instance, device, server) (disk:crc_errors:growth_24h), \"cat\", \"CrcD\", \"\", \"\") or label_replace(sum by(instance, device, server) (disk:command_timeout:raw), \"cat\", \"CmdTO\", \"\", \"\") or label_replace(sum by(instance, device, server) (smartctl_scsi_grown_defect_list), \"cat\", \"ScsiDef\", \"\", \"\") or label_replace((sum by(instance, device, server) (avg_over_time(disk:temperature:celsius[1h]))), \"cat\", \"Temp\", \"\", \"\")) and on(instance, device) topk(10, disk:anomaly:score > 0)) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
-          "refId": "A",
+          "expr": "((sum by(instance, device, server) (disk:pending_sectors:growth_7d)) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
+          "refId": "PendingD",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "((sum by(instance, device, server) (disk:reallocated_sectors:growth_7d)) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
+          "refId": "ReallocD",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "((sum by(instance, device, server) (disk:offline_uncorrectable:raw)) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
+          "refId": "OffUnc",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "((sum by(instance, device, server) (disk:reported_uncorrectable:raw)) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
+          "refId": "ReportUnc",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "((sum by(instance, device, server) (disk:crc_errors:growth_24h)) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
+          "refId": "CrcD",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "((sum by(instance, device, server) (disk:command_timeout:raw)) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
+          "refId": "CmdTO",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "((sum by(instance, device, server) (smartctl_scsi_grown_defect_list)) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
+          "refId": "ScsiDef",
+          "legendFormat": "",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "((sum by(instance, device, server) (avg_over_time(disk:temperature:celsius[1h]))) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
+          "refId": "Temp",
           "legendFormat": "",
           "format": "table"
         }
@@ -579,10 +649,6 @@
                 "aggregations": [],
                 "operation": "groupby"
               },
-              "cat": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
               "Value": {
                 "aggregations": [
                   "last"
@@ -593,53 +659,8 @@
           }
         },
         {
-          "id": "rowsToFields",
-          "options": {
-            "mappings": [
-              {
-                "fieldName": "cat",
-                "handlerKey": "field.name"
-              },
-              {
-                "fieldName": "Value (last)",
-                "handlerKey": "field.value"
-              },
-              {
-                "fieldName": "instance",
-                "handlerKey": "field.label"
-              },
-              {
-                "fieldName": "device",
-                "handlerKey": "field.label"
-              },
-              {
-                "fieldName": "server",
-                "handlerKey": "field.label"
-              },
-              {
-                "fieldName": "serial_number",
-                "handlerKey": "field.label"
-              },
-              {
-                "fieldName": "model_family",
-                "handlerKey": "field.label"
-              },
-              {
-                "fieldName": "model_name",
-                "handlerKey": "field.label"
-              },
-              {
-                "fieldName": "firmware_version",
-                "handlerKey": "field.label"
-              }
-            ]
-          }
-        },
-        {
-          "id": "labelsToFields",
-          "options": {
-            "mode": "columns"
-          }
+          "id": "merge",
+          "options": {}
         },
         {
           "id": "organize",
@@ -654,14 +675,14 @@
               "device": "デバイス",
               "serial_number": "シリアル",
               "model_family": "モデル",
-              "PendingD": "Pending Δ(7d)",
-              "ReallocD": "Realloc Δ(7d)",
-              "OffUnc": "Off-Unc",
-              "ReportUnc": "Reported-Unc",
-              "CrcD": "CRC Δ(24h)",
-              "CmdTO": "Cmd Timeout",
-              "ScsiDef": "SCSI defect",
-              "Temp": "Temp(°C)"
+              "Value (last) #PendingD": "Pending Δ(7d)",
+              "Value (last) #ReallocD": "Realloc Δ(7d)",
+              "Value (last) #OffUnc": "Off-Unc",
+              "Value (last) #ReportUnc": "Reported-Unc",
+              "Value (last) #CrcD": "CRC Δ(24h)",
+              "Value (last) #CmdTO": "Cmd Timeout",
+              "Value (last) #ScsiDef": "SCSI defect",
+              "Value (last) #Temp": "Temp(°C)"
             },
             "indexByName": {
               "サーバー": 0,
