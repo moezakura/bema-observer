@@ -542,13 +542,18 @@
           },
           "expr": "topk(10, (disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "Score",
-          "legendFormat": "",
-          "format": "table",
-          "instant": true,
-          "range": false
+          "legendFormat": ""
         }
       ],
       "transformations": [
+        {
+          "id": "timeSeriesTable",
+          "options": {
+            "Score": {
+              "stat": "lastNotNull"
+            }
+          }
+        },
         {
           "id": "organize",
           "options": {
@@ -694,13 +699,18 @@
           },
           "expr": "topk(10, (sum by(instance, device, server) (disk:pending_sectors:growth_7d)) > 0 * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
-          "legendFormat": "",
-          "format": "table",
-          "instant": true,
-          "range": false
+          "legendFormat": ""
         }
       ],
       "transformations": [
+        {
+          "id": "timeSeriesTable",
+          "options": {
+            "A": {
+              "stat": "lastNotNull"
+            }
+          }
+        },
         {
           "id": "organize",
           "options": {
@@ -823,13 +833,18 @@
           },
           "expr": "topk(10, (sum by(instance, device, server) (disk:reallocated_sectors:growth_7d)) > 0 * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
-          "legendFormat": "",
-          "format": "table",
-          "instant": true,
-          "range": false
+          "legendFormat": ""
         }
       ],
       "transformations": [
+        {
+          "id": "timeSeriesTable",
+          "options": {
+            "A": {
+              "stat": "lastNotNull"
+            }
+          }
+        },
         {
           "id": "organize",
           "options": {
@@ -952,13 +967,18 @@
           },
           "expr": "topk(10, (sum by(instance, device, server) (disk:offline_uncorrectable:raw)) > 0 * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
-          "legendFormat": "",
-          "format": "table",
-          "instant": true,
-          "range": false
+          "legendFormat": ""
         }
       ],
       "transformations": [
+        {
+          "id": "timeSeriesTable",
+          "options": {
+            "A": {
+              "stat": "lastNotNull"
+            }
+          }
+        },
         {
           "id": "organize",
           "options": {
@@ -1081,13 +1101,18 @@
           },
           "expr": "topk(10, (sum by(instance, device, server) (disk:crc_errors:growth_24h)) > 0 * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
-          "legendFormat": "",
-          "format": "table",
-          "instant": true,
-          "range": false
+          "legendFormat": ""
         }
       ],
       "transformations": [
+        {
+          "id": "timeSeriesTable",
+          "options": {
+            "A": {
+              "stat": "lastNotNull"
+            }
+          }
+        },
         {
           "id": "organize",
           "options": {
@@ -1210,13 +1235,18 @@
           },
           "expr": "topk(10, (sum by(instance, device, server) (disk:command_timeout:raw)) > 0 * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
-          "legendFormat": "",
-          "format": "table",
-          "instant": true,
-          "range": false
+          "legendFormat": ""
         }
       ],
       "transformations": [
+        {
+          "id": "timeSeriesTable",
+          "options": {
+            "A": {
+              "stat": "lastNotNull"
+            }
+          }
+        },
         {
           "id": "organize",
           "options": {
@@ -1339,13 +1369,18 @@
           },
           "expr": "topk(10, (sum by(instance, device, server) (avg_over_time(disk:temperature:celsius[1h]))) > 0 * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device))",
           "refId": "A",
-          "legendFormat": "",
-          "format": "table",
-          "instant": true,
-          "range": false
+          "legendFormat": ""
         }
       ],
       "transformations": [
+        {
+          "id": "timeSeriesTable",
+          "options": {
+            "A": {
+              "stat": "lastNotNull"
+            }
+          }
+        },
         {
           "id": "organize",
           "options": {
