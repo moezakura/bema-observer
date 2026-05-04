@@ -542,8 +542,7 @@
           },
           "expr": "disk:anomaly:score and on(instance, device) topk(10, disk:anomaly:score > 0)",
           "refId": "Score",
-          "legendFormat": "",
-          "format": "table"
+          "legendFormat": ""
         },
         {
           "datasource": {
@@ -552,8 +551,7 @@
           },
           "expr": "(sum by(instance, device, server) (disk:pending_sectors:growth_7d) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0)",
           "refId": "PendingD",
-          "legendFormat": "",
-          "format": "table"
+          "legendFormat": ""
         },
         {
           "datasource": {
@@ -562,8 +560,7 @@
           },
           "expr": "(sum by(instance, device, server) (disk:reallocated_sectors:growth_7d) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0)",
           "refId": "ReallocD",
-          "legendFormat": "",
-          "format": "table"
+          "legendFormat": ""
         },
         {
           "datasource": {
@@ -572,8 +569,7 @@
           },
           "expr": "(sum by(instance, device, server) (disk:offline_uncorrectable:raw) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0)",
           "refId": "OffUnc",
-          "legendFormat": "",
-          "format": "table"
+          "legendFormat": ""
         },
         {
           "datasource": {
@@ -582,8 +578,7 @@
           },
           "expr": "(sum by(instance, device, server) (disk:crc_errors:growth_24h) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0)",
           "refId": "CrcD",
-          "legendFormat": "",
-          "format": "table"
+          "legendFormat": ""
         },
         {
           "datasource": {
@@ -592,8 +587,7 @@
           },
           "expr": "(sum by(instance, device, server) (disk:temperature:celsius) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0)",
           "refId": "Temp",
-          "legendFormat": "",
-          "format": "table"
+          "legendFormat": ""
         },
         {
           "datasource": {
@@ -602,8 +596,7 @@
           },
           "expr": "(max by(instance, device, server, serial_number, model_family, model_name, firmware_version) (smartctl_device)) and on(instance, device) topk(10, disk:anomaly:score > 0)",
           "refId": "Info",
-          "legendFormat": "",
-          "format": "table"
+          "legendFormat": ""
         }
       ],
       "transformations": [
