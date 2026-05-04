@@ -543,7 +543,9 @@
           "expr": "((sum by(instance, device, server) (disk:pending_sectors:growth_7d)) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
           "refId": "PendingD",
           "legendFormat": "",
-          "format": "table"
+          "format": "table",
+          "instant": true,
+          "range": false
         },
         {
           "datasource": {
@@ -553,7 +555,9 @@
           "expr": "((sum by(instance, device, server) (disk:reallocated_sectors:growth_7d)) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
           "refId": "ReallocD",
           "legendFormat": "",
-          "format": "table"
+          "format": "table",
+          "instant": true,
+          "range": false
         },
         {
           "datasource": {
@@ -563,7 +567,9 @@
           "expr": "((sum by(instance, device, server) (disk:offline_uncorrectable:raw)) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
           "refId": "OffUnc",
           "legendFormat": "",
-          "format": "table"
+          "format": "table",
+          "instant": true,
+          "range": false
         },
         {
           "datasource": {
@@ -573,7 +579,9 @@
           "expr": "((sum by(instance, device, server) (disk:reported_uncorrectable:raw)) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
           "refId": "ReportUnc",
           "legendFormat": "",
-          "format": "table"
+          "format": "table",
+          "instant": true,
+          "range": false
         },
         {
           "datasource": {
@@ -583,7 +591,9 @@
           "expr": "((sum by(instance, device, server) (disk:crc_errors:growth_24h)) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
           "refId": "CrcD",
           "legendFormat": "",
-          "format": "table"
+          "format": "table",
+          "instant": true,
+          "range": false
         },
         {
           "datasource": {
@@ -593,7 +603,9 @@
           "expr": "((sum by(instance, device, server) (disk:command_timeout:raw)) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
           "refId": "CmdTO",
           "legendFormat": "",
-          "format": "table"
+          "format": "table",
+          "instant": true,
+          "range": false
         },
         {
           "datasource": {
@@ -603,7 +615,9 @@
           "expr": "((sum by(instance, device, server) (smartctl_scsi_grown_defect_list)) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
           "refId": "ScsiDef",
           "legendFormat": "",
-          "format": "table"
+          "format": "table",
+          "instant": true,
+          "range": false
         },
         {
           "datasource": {
@@ -613,51 +627,12 @@
           "expr": "((sum by(instance, device, server) (avg_over_time(disk:temperature:celsius[1h]))) or on(instance, device, server) (disk:anomaly:score * 0)) and on(instance, device) topk(10, disk:anomaly:score > 0) * on(instance, device) group_left(serial_number, model_family, model_name, firmware_version) max by(instance, device, serial_number, model_family, model_name, firmware_version) (smartctl_device)",
           "refId": "Temp",
           "legendFormat": "",
-          "format": "table"
+          "format": "table",
+          "instant": true,
+          "range": false
         }
       ],
       "transformations": [
-        {
-          "id": "groupBy",
-          "options": {
-            "fields": {
-              "instance": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "device": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "server": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "serial_number": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "model_family": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "model_name": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "firmware_version": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "Value": {
-                "aggregations": [
-                  "last"
-                ],
-                "operation": "aggregate"
-              }
-            }
-          }
-        },
         {
           "id": "merge",
           "options": {}
@@ -675,14 +650,14 @@
               "device": "デバイス",
               "serial_number": "シリアル",
               "model_family": "モデル",
-              "Value (last) #PendingD": "Pending Δ(7d)",
-              "Value (last) #ReallocD": "Realloc Δ(7d)",
-              "Value (last) #OffUnc": "Off-Unc",
-              "Value (last) #ReportUnc": "Reported-Unc",
-              "Value (last) #CrcD": "CRC Δ(24h)",
-              "Value (last) #CmdTO": "Cmd Timeout",
-              "Value (last) #ScsiDef": "SCSI defect",
-              "Value (last) #Temp": "Temp(°C)"
+              "Value #PendingD": "Pending Δ(7d)",
+              "Value #ReallocD": "Realloc Δ(7d)",
+              "Value #OffUnc": "Off-Unc",
+              "Value #ReportUnc": "Reported-Unc",
+              "Value #CrcD": "CRC Δ(24h)",
+              "Value #CmdTO": "Cmd Timeout",
+              "Value #ScsiDef": "SCSI defect",
+              "Value #Temp": "Temp(°C)"
             },
             "indexByName": {
               "サーバー": 0,
